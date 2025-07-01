@@ -29,7 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 @Preview(showBackground = true)
 fun BusListScreen(viewModel: BusViewModel = viewModel()) {
     val buses by viewModel.busList.collectAsState()
-    val busname = "aaaaa"
+    val busname = "Bus Notification"
 
     LaunchedEffect(Unit) {
         viewModel.loadBus()
