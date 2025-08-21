@@ -1,6 +1,5 @@
 package com.will.busnotification.data.dto
 
-
 data class RouteRequest(
     val origin: LocationInput,
     val destination: LocationInput,
