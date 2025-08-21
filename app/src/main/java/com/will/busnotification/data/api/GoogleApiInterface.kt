@@ -27,5 +27,4 @@ interface GoogleApiInterface {
 //        @Body busRequestDTO: RouteRequest
 //    ): Call<List<Bus>>
 
-
 }

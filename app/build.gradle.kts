@@ -52,7 +52,8 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.media3.common.ktx)
-    //noinspection UseTomlInstead
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+    //noinspection UseTomlInsteada
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
