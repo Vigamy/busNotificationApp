@@ -29,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.ui.components.BusItemComponent
+import com.will.busnotification.ui.components.HeaderComponent
 import com.will.busnotification.viewmodel.BusViewModel
 
 @Composable
@@ -38,7 +39,6 @@ fun HomeScreen(
     viewModel: BusViewModel = viewModel()
 ) {
     val buses by viewModel.busList.collectAsState()
-    val busname = "Bus Notification"
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -46,34 +46,25 @@ fun HomeScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(20.dp)
-        ) {
-
-            Text(
-                text = busname,
-                fontSize = 20.sp,
+        Column {
+            HeaderComponent(text = "Bus Notification", hasBack = false)
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize(Alignment.Center)
-                    .padding(40.dp, 12.dp, 12.dp, 12.dp)
-
-            )
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f) // Faz a LazyColumn ocupar o espaço disponível
-                    .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                    .fillMaxSize()
+                    .padding(20.dp)
             ) {
-                items(buses) { bus ->
-                    BusItemComponent(bus)
-                    Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f) // Faz a LazyColumn ocupar o espaço disponível
+                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
+                ) {
+                    items(buses) { bus ->
+                        BusItemComponent(bus)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             }
         }
-
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
