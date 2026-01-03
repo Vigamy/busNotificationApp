@@ -59,7 +59,7 @@ fun HomeScreen(
                         .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
                 ) {
                     items(buses) { bus ->
-                        BusItemComponent(bus)
+                        BusItemComponent(bus, false)
                         Spacer(modifier = Modifier.height(8.dp))
                     }
                 }

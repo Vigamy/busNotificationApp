@@ -29,7 +29,7 @@ fun HeaderComponent(
         modifier = modifier
             .fillMaxWidth()
             .background(Color(0xFF5B8FCF))
-            .padding(32.dp)
+            .padding(vertical = 32.dp)
     ) {
         if (hasBack) {
             IconButton(onClick = onBackClick) {
@@ -44,10 +44,10 @@ fun HeaderComponent(
         Text(
             modifier = modifier
                 .align(Alignment.CenterStart)
-                .padding(horizontal = if (hasBack) 48.dp else 0.dp),
+                .padding(horizontal = if (hasBack) 48.dp else 32.dp),
             text = text,
             color = Color.White,
-            fontSize = 32.sp,
+            fontSize = 28.sp,
         )
     }
 }
@@ -55,5 +55,5 @@ fun HeaderComponent(
 @Preview
 @Composable
 fun HeaderComponentPreview() {
-    HeaderComponent(text = "Header Component", hasBack = false)
+    HeaderComponent(text = "Adicionar notificacao", hasBack = true)
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -21,6 +22,7 @@ import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.data.model.Bus
 import com.will.busnotification.ui.components.BusItemComponent
 import com.will.busnotification.ui.components.BusItemLineComponent
+import com.will.busnotification.ui.components.HeaderComponent
 import com.will.busnotification.viewmodel.AddBusViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,27 +39,29 @@ fun AddBusScreen(
             departureTime = "10",
             arrivalStop = "10",
             arrivalTime = "10",
-            color = "#FF0000",
+            color = "#FF0000"   ,
             textColor = "#FFFFFF"
         )
     )
 
     // TODO: Fazer aparecer os onibus com base na proximidade por localização do user
 //    val listBusResponse = viewModel.busList.value
-    Box(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        HeaderComponent(text = "Adicionar Notificação", hasBack = true)
         SearchBar(
             modifier = Modifier
-                .height(100.dp)
+                .height(90.dp)
                 .padding(20.dp),
+            shape = ShapeDefaults.Medium,
             query = "",
             onQueryChange = {},
             onSearch = {},
             active = false,
             onActiveChange = {},
-            placeholder = { Text("Search") }
+            placeholder = { Text("Pesquisar") }
         ) {
         }
-
+        Spacer(modifier = Modifier.height(20.dp))
         Column {
             LazyColumn(
                 modifier = Modifier
@@ -65,7 +69,7 @@ fun AddBusScreen(
                     .padding(start = 24.dp, end = 24.dp, bottom = 24.dp)
             ) {
                 items(buses) { bus ->
-                    BusItemComponent(bus)
+                    BusItemComponent(bus, true)
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
