@@ -17,13 +17,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
 fun HeaderComponent(
     modifier: Modifier = Modifier,
     text: String,
     hasBack: Boolean,
-    onBackClick: () -> Unit = {}
+    navController: NavController? = null,
 ) {
     Box(
         modifier = modifier
@@ -32,7 +33,7 @@ fun HeaderComponent(
             .padding(vertical = 32.dp)
     ) {
         if (hasBack) {
-            IconButton(onClick = onBackClick) {
+            IconButton(onClick = { navController?.popBackStack()} ) {
                 Icon(
                     modifier = modifier.size(64.dp),
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,

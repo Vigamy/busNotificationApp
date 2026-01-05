@@ -47,7 +47,7 @@ fun AddBusScreen(
     // TODO: Fazer aparecer os onibus com base na proximidade por localização do user
 //    val listBusResponse = viewModel.busList.value
     Column(modifier = Modifier.fillMaxSize()) {
-        HeaderComponent(text = "Adicionar Notificação", hasBack = true)
+        HeaderComponent(text = "Adicionar Notificação", hasBack = true, navController = navController)
         SearchBar(
             modifier = Modifier
                 .height(90.dp)
