@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.ui.AddBusScreen
 import com.will.busnotification.ui.HomeScreen
+import com.will.busnotification.ui.NotificationsScreen
 
 @Composable
 fun AppNavHost(navController: NavHostController = rememberNavController()) {
@@ -16,5 +17,6 @@ fun AppNavHost(navController: NavHostController = rememberNavController()) {
     ) {
         composable("home") { HomeScreen(navController) }
         composable("addBuss") { AddBusScreen(navController) }
+        composable("notifications") { NotificationsScreen(navController) }
     }
 }
