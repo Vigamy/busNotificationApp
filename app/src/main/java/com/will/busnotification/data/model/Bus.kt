@@ -8,6 +8,6 @@ data class Bus(
     val departureTime: String,
     val arrivalStop: String,
     val arrivalTime: String,
-    val color: String,
-    val textColor: String
+    val color: Int,
+    val textColor: Int
 )

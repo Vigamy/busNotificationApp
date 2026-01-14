@@ -16,7 +16,9 @@ import retrofit2.Response
 
 class BusViewModel : ViewModel() {
     private val _busList = MutableStateFlow<List<Bus>>(emptyList())
+    private val _notifiedBuses = MutableStateFlow<List<Bus>>(emptyList())
     val busList: StateFlow<List<Bus>> = _busList
+    val notifiedBusList: StateFlow<List<Bus>> = _notifiedBuses
 
     fun loadBus() {
         val requestBody = RouteRequest(
@@ -44,5 +46,30 @@ class BusViewModel : ViewModel() {
                     }
                 }
             })
+    }
+
+    fun loadNotifiedBuses() {
+        // Implement loading of notified buses from storage or database
+        _notifiedBuses.value = listOf(
+            // Example data
+            Bus(
+                "Bus 1", "Route A", "10:00 AM",
+                departureStop = "Main Street",
+                departureTime = "09:50 AM",
+                arrivalStop = "Central Station",
+                arrivalTime = "10:30 AM",
+                color = 0xFF2196F3.toInt(),
+                textColor = 0xFFFFFFFF.toInt()
+            ),
+            Bus(
+                "Bus 2", "Route B", "11:00 AM",
+                departureStop = "2nd Ave",
+                departureTime = "10:50 AM",
+                arrivalStop = "Downtown",
+                arrivalTime = "11:20 AM",
+                color = 0xFF4CAF50.toInt(),
+                textColor = 0xFF000000.toInt()
+            )
+        )
     }
 }

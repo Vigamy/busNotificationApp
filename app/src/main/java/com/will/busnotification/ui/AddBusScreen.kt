@@ -1,6 +1,5 @@
 package com.will.busnotification.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,8 +38,8 @@ fun AddBusScreen(
             departureTime = "10",
             arrivalStop = "10",
             arrivalTime = "10",
-            color = "#FF0000"   ,
-            textColor = "#FFFFFF"
+            color = 100,
+            textColor = 100
         )
     )
 

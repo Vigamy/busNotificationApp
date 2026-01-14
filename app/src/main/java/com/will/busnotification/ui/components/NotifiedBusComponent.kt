@@ -1,12 +1,10 @@
 package com.will.busnotification.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -118,5 +116,5 @@ fun NotifiedBusComponent(
 @Preview
 @Composable
 fun NotifiedBusComponentPreview() {
-    NotifiedBusComponent(bus = Bus("123", "Central", "10:00", "456", "Some Line", "nao sei", "10h", "Origin", "Destination Name"))
+    NotifiedBusComponent(bus = Bus("123", "Central", "10:00", "456", "Some Line", "nao sei", "10h", 123, 123))
 }
