@@ -1,15 +1,58 @@
 package com.will.busnotification.viewmodel
 
 import androidx.lifecycle.ViewModel
-import com.will.busnotification.data.model.Bus
+import androidx.lifecycle.viewModelScope
+import com.will.busnotification.data.dto.PlaceResult
+import com.will.busnotification.repository.PlacesRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
-class AddBusViewModel : ViewModel() {
+@OptIn(FlowPreview::class)
+@HiltViewModel
+class AddBusViewModel @Inject constructor(
+    private val placesRepository: PlacesRepository
+) : ViewModel() {
 
-    private val _busList = MutableStateFlow<List<Bus>>(emptyList())
-    val busList: StateFlow<List<Bus>> = _busList
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-    
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
+    private val _searchResults = MutableStateFlow<List<PlaceResult>>(emptyList())
+    val searchResults: StateFlow<List<PlaceResult>> = _searchResults.asStateFlow()
+
+    init {
+        _searchQuery
+            .debounce(500) // Evita chamadas de API a cada letra digitada
+            .onEach { query ->
+                if (query.isBlank()) {
+                    _searchResults.value = emptyList()
+                    _isSearching.value = false
+                } else {
+                    _isSearching.value = true
+                    try {
+                        val results = placesRepository.searchPlaces(query)
+                        _searchResults.value = results
+                    } catch (e: Exception) {
+                        // Trate o erro apropriadamente (ex: mostre uma mensagem)
+                        _searchResults.value = emptyList()
+                    } finally {
+                        _isSearching.value = false
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+    }
 }
