@@ -54,8 +54,7 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
 @Preview
 @Composable
 fun BusItemPreview() {
-    BusItemComponent(
-        bus = Bus("123", "Central", "10:00", "456", "Some Line", "nao sei", "10h", "Origin", "Destination Name"),
+    BusItemComponent(bus = Bus("123", "Central", "10:00", "456", "Some Line", "nao sei", "10h", 123, 123),
         hasArrow = true,
         modifier = Modifier.padding(8.dp)
     )
