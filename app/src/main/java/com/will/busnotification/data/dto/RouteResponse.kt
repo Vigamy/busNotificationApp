@@ -33,10 +33,11 @@ data class StopDetails(
 
 data class StopInfo(
     val name: String,
-    val location: Location
+    val location: RouteLocation
 )
 
-data class Location(
+// Renamed from Location to RouteLocation to avoid redeclaration with Location.kt
+data class RouteLocation(
     val latLng: LatLng
 )
 

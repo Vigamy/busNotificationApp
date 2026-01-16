@@ -1,5 +1,8 @@
 package com.will.busnotification.data.model
 
-class Stop {
-
-}
+data class Stop(
+    val id: String,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double
+)
