@@ -32,7 +32,7 @@ fun NotificationHistoryScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        HeaderComponent(text = "Histórico de Notificações", hasBack = true, navController = navController)
+        HeaderComponent(text = "Histórico de Notificações", hasBack = true)
         LazyColumn (
             modifier = Modifier.fillMaxSize()
                 .padding(20.dp)
