@@ -16,7 +16,7 @@ interface GoogleApiInterface {
     @POST("https://routes.googleapis.com/directions/v2:computeRoutes")
     fun getBus(
         @Body body: RouteRequest,
-        @Header("X-Goog-Api-Key") apiKey: String = "AIzaSyB1bNCyVsnT0fFQsXH2RsmnlXiQzqGKHU8",
+        @Header("X-Goog-Api-Key") apiKey: String = BuildConfig.GOOGLE_API_KEY,
         @Header("X-Goog-FieldMask") fieldMask: String = "routes.legs.steps.transitDetails",
     ): Call<RouteResponse>
 

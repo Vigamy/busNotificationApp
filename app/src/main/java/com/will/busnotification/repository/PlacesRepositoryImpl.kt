@@ -13,7 +13,7 @@ class PlacesRepositoryImpl @Inject constructor(
         // TODO: Substitua "SUA_CHAVE_DE_API_AQUI" pela sua chave de API do Google Places.
         // Lembre-se de que esta não é uma prática segura para produção.
         // A chave deve ser armazenada de forma segura (ex: build.gradle ou local.properties).
-        val apiKey = "SUA_CHAVE_DE_API_AQUI"
+        val apiKey = BuildConfig.GOOGLE_API_KEY
         val response: PlacesResponse = apiService.searchPlaces(query = query, apiKey = apiKey)
         return response.results
     }
