@@ -10,8 +10,17 @@ plugins {
 }
 
 val localProperties = Properties().apply {
-    load(rootProject.file("local.properties").inputStream())
+    // load only if the file exists so we don't throw when it's absent
+    val lpFile = rootProject.file("local.properties")
+    if (lpFile.exists()) {
+        load(lpFile.inputStream())
+    }
 }
+
+// Prefer local.properties -> environment variable -> empty string
+val googleApiKey = localProperties.getProperty("GOOGLE_API_KEY")
+    ?: System.getenv("GOOGLE_API_KEY")
+    ?: ""
 
 android {
     namespace = "com.will.busnotification"
@@ -24,7 +33,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        buildConfigField("String", "GOOGLE_API_KEY", "\"${localProperties["GOOGLE_API_KEY"]}\"")
+        // Use the resolved key; if missing this will be an empty string instead of the literal "null"
+        buildConfigField("String", "GOOGLE_API_KEY", "\"$googleApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

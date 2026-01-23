@@ -1,6 +1,7 @@
 package com.will.busnotification.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.api.GoogleApiInstance
 import com.will.busnotification.data.dto.LocationInput
 import com.will.busnotification.data.dto.RouteRequest
@@ -31,7 +32,7 @@ class BusViewModel : ViewModel() {
                 allowedTravelModes = listOf("BUS")
             )
         )
-        GoogleApiInstance.retrofit.getBus(requestBody, apiKey = "AIzaSyB1bNCyVsnT0fFQsXH2RsmnlXiQzqGKHU8")
+        GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
             .enqueue(object : Callback<RouteResponse> {
                 override fun onResponse(call: Call<RouteResponse?>, response: Response<RouteResponse?>) {
                     if (response.isSuccessful) {
