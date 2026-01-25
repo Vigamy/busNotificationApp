@@ -10,16 +10,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,10 +34,11 @@ fun NotifiedBusComponent(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFC7DFFE) // azul claro do card
+            containerColor = Color(0xFFC7DFFE) // light blue background
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -46,75 +47,116 @@ fun NotifiedBusComponent(
                 .padding(16.dp)
         ) {
 
-            // Badge do horário (canto superior direito)
+            // Top-center small avatar badge
             Box(
-                modifier = modifier
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-12).dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = bus.lineShortName.takeIf { it.isNotEmpty() }?.firstOrNull()?.toString() ?: "B",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2C3ED6)
+                )
+            }
+
+            // Time badge (top-right)
+            Box(
+                modifier = Modifier
                     .align(Alignment.TopEnd)
-                    .background(
-                        color = Color(0xFF2C3ED6), // azul escuro
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color(0xFF2C3ED6))
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
                     text = bus.arrivalTime,
                     color = Color.White,
-                    fontSize = 14.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
 
-            Column(
-                modifier = Modifier.padding(end = 72.dp) // espaço pro horário
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(top = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-
-                // Linha + ícone
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                // Left icon circle
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Done, //Mudar depois pra Bus
-                        contentDescription = null,
-                        tint = Color.Black,
-                        modifier = Modifier.size(20.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(8.dp))
-
+                    // Use a simple emoji as a fallback for the bus icon to avoid requiring
+                    // the material-icons-extended dependency in the project.
                     Text(
-                        text = bus.lineName,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
+                        text = "🚌",
+                        fontSize = 22.sp,
                         color = Color.Black
                     )
                 }
 
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                // Origem → Destino
-                Text(
-                    text = "${bus.lineName} → ${bus.destination}",
-                    fontSize = 14.sp,
-                    color = Color(0xFF1F2933)
-                )
+                Column {
+                    // Large line name
+                    Text(
+                        text = bus.lineName,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Black
+                    )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
-                // Nome do ponto
-                Text(
-                    text = bus.lineShortName,
-                    fontSize = 14.sp,
-                    color = Color(0xFF1F2933),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
+                    // Route (departure -> destination)
+                    Text(
+                        text = "${bus.departureStop} → ${bus.arrivalStop}",
+                        fontSize = 16.sp,
+                        color = Color(0xFF1F2933),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
+
+            // Large address / street line at bottom
+            Text(
+                text = bus.destination,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(top = 8.dp),
+                fontSize = 18.sp,
+                color = Color(0xFF0F1720),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun NotifiedBusComponentPreview() {
-    NotifiedBusComponent(bus = Bus("123", "Central", "10:00", "456", "Some Line", "nao sei", "10h", 123, 123))
+    NotifiedBusComponent(
+        bus = Bus(
+            lineName = "118Y",
+            lineShortName = "118",
+            destination = "Rua Willamy Ricardo Pinatto Andreotti",
+            departureStop = "ponto 1",
+            departureTime = "09:50",
+            arrivalStop = "ponto 2",
+            arrivalTime = "06:16",
+            color = 0xFFC7DFFE.toInt(),
+            textColor = 0xFF000000.toInt()
+        )
+    )
 }
