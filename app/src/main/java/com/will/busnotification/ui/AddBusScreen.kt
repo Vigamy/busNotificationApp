@@ -12,8 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -37,14 +42,15 @@ fun AddBusScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
-    // val isSearching by viewModel.isSearching.collectAsState() // Descomente se precisar mostrar um indicador de loading
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().padding(top = 8.dp)) {
         HeaderComponent(
             text = "Adicionar Notificação",
             hasBack = true,
             onBackClick = { navController.popBackStack() }
         )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         SearchBar(
             modifier = Modifier
@@ -55,29 +61,43 @@ fun AddBusScreen(
             onSearch = {},
             active = searchResults.isNotEmpty() || searchQuery.isNotBlank(),
             onActiveChange = {},
+            leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Pesquisar") },
             placeholder = { Text("Pesquisar parada ou endereço") }
         ) {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
                 items(searchResults) { place ->
-                    Row(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { /* TODO: Ação ao clicar no resultado */ }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(vertical = 6.dp)
+                            .clickable { /* TODO: Ação ao clicar no resultado */ },
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Ícone de localização",
-                            modifier = Modifier.padding(end = 16.dp)
-                        )
-                        Text(text = place.name)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Ícone de localização",
+                                modifier = Modifier.padding(end = 12.dp)
+                            )
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(text = place.name, fontWeight = FontWeight.SemiBold)
+                                // PlaceResult has no `vicinity`; show coordinates as subtitle instead
+                                val lat = place.geometry.location.lat
+                                val lng = place.geometry.location.lng
+                                Text(text = "${lat}, ${lng}", style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
                     }
                 }
             }
         }
 
-        // A lista de ônibus por proximidade pode ser adicionada aqui no futuro
         Spacer(modifier = Modifier.height(20.dp))
 
     }
