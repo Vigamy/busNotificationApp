@@ -19,10 +19,9 @@ import com.will.busnotification.ui.components.HeaderComponent
 import com.will.busnotification.ui.components.NotifiedBusComponent
 import com.will.busnotification.viewmodel.BusViewModel
 
-@Preview(showBackground = true)
 @Composable
 fun NotificationHistoryScreen(
-    navController: NavHostController = rememberNavController(),
+    navController: NavHostController,
     viewModel: BusViewModel = viewModel()
 ) {
     val buses by viewModel.notifiedBusList.collectAsState()
@@ -32,7 +31,7 @@ fun NotificationHistoryScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        HeaderComponent(text = "Histórico de Notificações", hasBack = true)
+        HeaderComponent(text = "Histórico de Notificações", hasBack = true, onBackClick = { navController.popBackStack() })
         LazyColumn (
             modifier = Modifier.fillMaxSize()
                 .padding(20.dp)
@@ -42,4 +41,10 @@ fun NotificationHistoryScreen(
             }
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NotificationHistoryScreenPreview() {
+    NotificationHistoryScreen(navController = rememberNavController())
 }
