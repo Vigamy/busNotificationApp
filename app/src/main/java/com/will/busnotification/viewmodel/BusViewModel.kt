@@ -11,6 +11,9 @@ import com.will.busnotification.data.model.Bus
 import com.will.busnotification.repository.toBusList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.DocumentSnapshot
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,6 +23,54 @@ class BusViewModel : ViewModel() {
     private val _notifiedBuses = MutableStateFlow<List<Bus>>(emptyList())
     val busList: StateFlow<List<Bus>> = _busList
     val notifiedBusList: StateFlow<List<Bus>> = _notifiedBuses
+
+    private val firestore = Firebase.firestore
+
+    fun loadBusFromFirebase() {
+        val locationsRef = firestore.collection("locations")
+        val originDoc = locationsRef.document("origin")
+        val destDoc = locationsRef.document("destination")
+
+        originDoc.get().addOnSuccessListener { originSnap: DocumentSnapshot ->
+            destDoc.get().addOnSuccessListener { destSnap: DocumentSnapshot ->
+                val originAddress = originSnap.getString("address") ?: ""
+                val destAddress = destSnap.getString("address") ?: ""
+
+                // Ajuste aqui os parâmetros de LocationInput conforme sua implementação real.
+                val originInput = LocationInput(address = originAddress)
+                val destinationInput = LocationInput(address = destAddress)
+
+                val requestBody = RouteRequest(
+                    origin = originInput,
+                    destination = destinationInput,
+                    travelMode = "TRANSIT",
+                    computeAlternativeRoutes = true,
+                    transitPreferences = TransitPreferences(
+                        routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
+                        allowedTravelModes = listOf("BUS")
+                    )
+                )
+
+                GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
+                    .enqueue(object : Callback<RouteResponse> {
+                        override fun onResponse(call: Call<RouteResponse?>, response: Response<RouteResponse?>) {
+                            if (response.isSuccessful) {
+                                val buses = response.body()?.toBusList() ?: emptyList()
+                                _busList.value = buses
+                            }
+                        }
+
+                        override fun onFailure(p0: Call<RouteResponse?>, p1: Throwable) {
+                            p1.message?.let { println(it) }
+                        }
+                    })
+            }.addOnFailureListener { e: Exception ->
+                println("Erro ao ler destination: ${e.message}")
+            }
+        }.addOnFailureListener { e: Exception ->
+            println("Erro ao ler origin: ${e.message}")
+        }
+    }
 
     fun loadBus() {
         val requestBody = RouteRequest(

@@ -88,6 +88,11 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
+    // --- Firebase (BoM + Firestore KTX) ---
+    // Using the BoM ensures compatible versions for firebase libraries.
+    implementation(platform("com.google.firebase:firebase-bom:32.2.0"))
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -96,3 +101,12 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+// If you plan to use the full Firebase project configuration (recommended),
+// place your `google-services.json` file under `app/` and apply the
+// Google Services Gradle plugin. With the version catalog above you can
+// add the plugin alias at the top like:
+// plugins { alias(libs.plugins.google.services) }
+// or apply it at the bottom with:
+// apply(plugin = "com.google.gms.google-services")
+// The google-services.json file is generated in the Firebase console (Project Settings).

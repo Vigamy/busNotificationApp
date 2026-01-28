@@ -43,7 +43,7 @@ fun AddBusScreen(
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize().padding(top = 8.dp)) {
+    Column(modifier = Modifier.fillMaxSize()) {
         HeaderComponent(
             text = "Adicionar Notificação",
             hasBack = true,
