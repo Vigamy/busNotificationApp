@@ -3,11 +3,9 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.kotlin.compose)
-    // Adiciona plugin Hilt do catálogo
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.google.services)
-    id("kotlin-kapt")
+    alias(libs.plugins.kotlin.kapt)
 }
 
 val localProperties = Properties().apply {
@@ -35,7 +33,7 @@ android {
         versionName = "1.0"
 
         // Use the resolved key; if missing this will be an empty string instead of the literal "null"
-        buildConfigField("String", "GOOGLE_API_KEY", "\"$googleApiKey\"")
+        buildConfigField("String", "GOOGLE_API_KEY", "\"\"$googleApiKey\"\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -53,11 +51,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 }
@@ -94,7 +88,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.analytics)
-
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
