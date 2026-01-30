@@ -50,7 +50,6 @@ fun AddBusScreen(
             onBackClick = { navController.popBackStack() }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
 
         SearchBar(
             modifier = Modifier
@@ -62,7 +61,7 @@ fun AddBusScreen(
             active = searchResults.isNotEmpty() || searchQuery.isNotBlank(),
             onActiveChange = {},
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Pesquisar") },
-            placeholder = { Text("Pesquisar parada ou endereço") }
+            placeholder = { Text("Digite o destino") }
         ) {
             LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
                 items(searchResults) { place ->
