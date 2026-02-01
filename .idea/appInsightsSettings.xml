@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.will.busnotification" />
+                  <option name="mobileSdkAppId" value="1:20912468275:android:d7c49f04f51029f5470e46" />
+                  <option name="projectId" value="busnotification-dce5e" />
+                  <option name="projectNumber" value="20912468275" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

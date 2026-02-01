@@ -1,5 +1,6 @@
 package com.will.busnotification.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.will.busnotification.data.dto.PlaceResult
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
@@ -38,14 +40,16 @@ class AddBusViewModel @Inject constructor(
                     _isSearching.value = false
                 } else {
                     _isSearching.value = true
-                    try {
-                        val results = placesRepository.searchPlaces(query)
-                        _searchResults.value = results
-                    } catch (e: Exception) {
-                        // Trate o erro apropriadamente (ex: mostre uma mensagem)
-                        _searchResults.value = emptyList()
-                    } finally {
-                        _isSearching.value = false
+                    viewModelScope.launch {
+                        try {
+                            val results = placesRepository.searchPlaces(query)
+                            _searchResults.value = results
+                        } catch (e: Exception) {
+                            Log.e("AddBusViewModel", "searchPlaces failed", e)
+                            _searchResults.value = emptyList()
+                        } finally {
+                            _isSearching.value = false
+                        }
                     }
                 }
             }

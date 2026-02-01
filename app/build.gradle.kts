@@ -7,7 +7,7 @@ plugins {
     // Adiciona plugin Hilt do catálogo
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.google.services)
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
 }
 
 val localProperties = Properties().apply {
@@ -83,7 +83,7 @@ dependencies {
 
     // Hilt and related
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Coroutines

@@ -1,14 +1,17 @@
 package com.will.busnotification.data.network
 
 import com.will.busnotification.data.dto.PlacesResponse
-import retrofit2.http.GET
-import retrofit2.http.Query
+import com.will.busnotification.data.dto.RouteRequest
+import retrofit2.http.Body
+import retrofit2.http.Header
+import retrofit2.http.POST
 
 interface GooglePlacesApiService {
 
-    @GET("maps/api/place/textsearch/json")
+    // Use the Routes API host (routes.googleapis.com) and the X-Goog-Api-Key header
+    @POST("directions/v2:computeRoutes")
     suspend fun searchPlaces(
-        @Query("query") query: String,
-        @Query("key") apiKey: String // Lembre-se de substituir pela sua chave de API
+        @Header("X-Goog-Api-Key") apiKey: String,
+        @Body request: RouteRequest
     ): PlacesResponse
 }
