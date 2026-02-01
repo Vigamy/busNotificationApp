@@ -3,14 +3,11 @@ package com.will.busnotification.repository
 import android.util.Log
 import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.dto.LatLng
-import com.will.busnotification.data.dto.LocationDto
-import com.will.busnotification.data.dto.LocationLatLng
+import com.will.busnotification.data.dto.LocationInput
 import com.will.busnotification.data.dto.PlaceResult
 import com.will.busnotification.data.dto.PlacesResponse
-import com.will.busnotification.data.dto.RouteLocation
 import com.will.busnotification.data.dto.RouteRequest
 import com.will.busnotification.data.dto.TransitPreferences
-import com.will.busnotification.data.dto.Waypoint
 import com.will.busnotification.data.network.GooglePlacesApiService
 import retrofit2.HttpException
 import java.io.IOException
@@ -27,7 +24,7 @@ class PlacesRepositoryImpl @Inject constructor(
         // Get current location (lat/lng) — caller must ensure permissions
         val loc = try {
             locationProvider.getLastKnownLocation()
-        } catch (t: Throwable) {
+        } catch (_: Throwable) {
             null
         }
 
@@ -46,15 +43,18 @@ class PlacesRepositoryImpl @Inject constructor(
         }
 
         val request = RouteRequest(
-            origin = RouteLocation(
-                location = LocationLatLng(
-                    latLng = LatLng(
-                        latitude = originLat,
-                        longitude = originLng
-                    )
+            origin = LocationInput(
+                latLng = LatLng(
+                    latitude = originLat,
+                    longitude = originLng
                 )
             ),
-            destination = RouteLocation(location = LocationLatLng(latLng = LatLng(latitude = destLat, longitude = destLng))),
+            destination = LocationInput(
+                latLng = LatLng(
+                    latitude = destLat,
+                    longitude = destLng
+                )
+            ),
             travelMode = "TRANSIT",
             computeAlternativeRoutes = true,
             transitPreferences = TransitPreferences(
@@ -70,7 +70,7 @@ class PlacesRepositoryImpl @Inject constructor(
             // Try to log the server error body for 4xx/5xx
             val errBody = try {
                 e.response()?.errorBody()?.string()
-            } catch (t: Throwable) {
+            } catch (_: Throwable) {
                 "<failed to read error body>"
             }
             Log.e("PlacesRepository", "HttpException (${e.code()}): $errBody", e)

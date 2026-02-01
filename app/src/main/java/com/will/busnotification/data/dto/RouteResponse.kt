@@ -33,16 +33,7 @@ data class StopDetails(
 
 data class StopInfo(
     val name: String,
-    val location: RouteLocation
-)
-
-data class RouteLocation(
-    val latLng: LatLng
-)
-
-data class LatLng(
-    val latitude: Double,
-    val longitude: Double
+    val location: LatLng
 )
 
 data class LocalizedValues(

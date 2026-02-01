@@ -1,14 +1,18 @@
 package com.will.busnotification.data.dto
 
+/**
+ * Representação simples de coordenadas geográficas
+ */
 data class LatLng(
     val latitude: Double,
     val longitude: Double
 )
 
-data class LocationDto(
-    val latLng: LatLng
+/**
+ * Input para requisições de rota - suporta endereço ou coordenadas
+ */
+data class LocationInput(
+    val address: String? = null,
+    val latLng: LatLng? = null
 )
 
-data class Waypoint(
-    val location: LocationDto
-)
