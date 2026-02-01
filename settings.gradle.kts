@@ -1,19 +1,12 @@
 pluginManagement {
     repositories {
+        gradlePluginPortal()
         google()
         mavenCentral()
-        gradlePluginPortal()
-    }
-
-    // Pin Kotlin Gradle plugin versions to match version catalog (avoid accidental Kotlin 2.0 usage)
-    plugins {
-        id("org.jetbrains.kotlin.android") version "2.3.0"
-        id("org.jetbrains.kotlin.jvm") version "2.3.0"
-        id("org.jetbrains.kotlin.kapt") version "2.3.0"
-        id("org.jetbrains.kotlin.plugin.compose") version "2.3.0"
+        maven(uri("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev"))
+        maven(uri("https://maven.pkg.jetbrains.space/public/p/compose/dev"))
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
