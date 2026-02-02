@@ -50,7 +50,6 @@ fun AddBusScreen(
             onBackClick = { navController.popBackStack() }
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
 
         SearchBar(
             modifier = Modifier
@@ -62,7 +61,7 @@ fun AddBusScreen(
             active = searchResults.isNotEmpty() || searchQuery.isNotBlank(),
             onActiveChange = {},
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Pesquisar") },
-            placeholder = { Text("Pesquisar parada ou endereço") }
+            placeholder = { Text("Digite o destino") }
         ) {
             LazyColumn(modifier = Modifier.padding(horizontal = 16.dp)) {
                 items(searchResults) { place ->
@@ -88,8 +87,8 @@ fun AddBusScreen(
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(text = place.name, fontWeight = FontWeight.SemiBold)
                                 // PlaceResult has no `vicinity`; show coordinates as subtitle instead
-                                val lat = place.geometry.location.lat
-                                val lng = place.geometry.location.lng
+                                val lat = place.geometry.location.latitude
+                                val lng = place.geometry.location.longitude
                                 Text(text = "${lat}, ${lng}", style = MaterialTheme.typography.bodySmall)
                             }
                         }
