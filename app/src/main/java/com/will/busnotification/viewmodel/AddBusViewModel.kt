@@ -51,6 +51,7 @@ class AddBusViewModel @Inject constructor(
                             _isSearching.value = false
                         }
                     }
+                    Log.d("Google API response", "${_searchResults.value}")
                 }
             }
             .launchIn(viewModelScope)
