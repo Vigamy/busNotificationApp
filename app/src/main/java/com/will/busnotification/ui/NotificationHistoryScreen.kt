@@ -1,5 +1,6 @@
 package com.will.busnotification.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -34,7 +35,8 @@ fun NotificationHistoryScreen(
         HeaderComponent(text = "Histórico de Notificações", hasBack = true, onBackClick = { navController.popBackStack() })
         LazyColumn (
             modifier = Modifier.fillMaxSize()
-                .padding(20.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(buses) { bus ->
                 NotifiedBusComponent(bus)
