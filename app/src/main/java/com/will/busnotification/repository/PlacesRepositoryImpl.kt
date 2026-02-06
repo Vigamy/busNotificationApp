@@ -29,7 +29,7 @@ class PlacesRepositoryImpl @Inject constructor(
 
         val request = RouteRequest(
             origin = (
-                    AdressRequest(query)
+                    AdressRequest("Rua são ladislau, 141")
             ),
             destination = (
                     AdressRequest(query)
