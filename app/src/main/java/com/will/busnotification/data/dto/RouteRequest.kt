@@ -9,8 +9,8 @@ package com.will.busnotification.data.dto
  * @param transitPreferences Preferências para transporte público
  */
 data class RouteRequest(
-    val origin: LocationInput,
-    val destination: LocationInput,
+    val origin: AdressRequest,
+    val destination: AdressRequest,
     val travelMode: String = "TRANSIT",
     val computeAlternativeRoutes: Boolean = true,
     val transitPreferences: TransitPreferences? = null

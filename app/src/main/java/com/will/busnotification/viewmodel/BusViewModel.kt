@@ -53,14 +53,15 @@ class BusViewModel : ViewModel() {
 
                 GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
                     .enqueue(object : Callback<RouteResponse> {
-                        override fun onResponse(call: Call<RouteResponse?>, response: Response<RouteResponse?>) {
+                        override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
                             if (response.isSuccessful) {
-                                val buses = response.body()?.toBusList() ?: emptyList()
-                                _busList.value = buses
+                                response.body()?.let {
+                                    _busList.value = it.toBusList()
+                                }
                             }
                         }
 
-                        override fun onFailure(p0: Call<RouteResponse?>, p1: Throwable) {
+                        override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
                             p1.message?.let { println(it) }
                         }
                     })
@@ -85,14 +86,15 @@ class BusViewModel : ViewModel() {
         )
         GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
             .enqueue(object : Callback<RouteResponse> {
-                override fun onResponse(call: Call<RouteResponse?>, response: Response<RouteResponse?>) {
+                override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
                     if (response.isSuccessful) {
-                        val buses = response.body()?.toBusList() ?: emptyList()
-                        _busList.value = buses
+                        response.body()?.let {
+                            _busList.value = it.toBusList()
+                        }
                     }
                 }
 
-                override fun onFailure(p0: Call<RouteResponse?>, p1: Throwable) {
+                override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
                     if (p1.message != null) {
                         println(p1.message)
                     }
