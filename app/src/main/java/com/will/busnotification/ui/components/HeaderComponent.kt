@@ -30,7 +30,6 @@ fun HeaderComponent(
     onBackClick: (() -> Unit)? = null,
     onBellClick: (() -> Unit)? = null
 ) {
-    // Standard icon container width to avoid title overlap
     val iconSlotWidth: Dp = 56.dp
 
     Box(
@@ -39,7 +38,6 @@ fun HeaderComponent(
             .background(Color(0xFF5B8FCF))
             .padding(vertical = 16.dp)
     ) {
-        // Back button (if requested)
         if (hasBack) {
             IconButton(
                 onClick = { onBackClick?.invoke() },
@@ -56,7 +54,6 @@ fun HeaderComponent(
             }
         }
 
-        // Title - either centered or start-aligned (preserve previous behavior by default)
         if (titleCentered) {
             Text(
                 modifier = Modifier.align(Alignment.Center),
@@ -65,7 +62,6 @@ fun HeaderComponent(
                 fontSize = 20.sp,
             )
         } else {
-            // Align start but keep a left inset so it doesn't overlap with the back icon
             val startPadding = if (hasBack) iconSlotWidth else 16.dp
             Text(
                 modifier = Modifier
@@ -77,7 +73,6 @@ fun HeaderComponent(
             )
         }
 
-        // Bell (notifications) button - only if hasBell is true
         if (hasBell) {
             IconButton(
                 onClick = { onBellClick?.invoke() },
