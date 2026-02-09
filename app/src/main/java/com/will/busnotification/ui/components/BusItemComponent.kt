@@ -43,7 +43,6 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Left: main info
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "${bus.lineShortName} - ${bus.destination}",
@@ -56,12 +55,10 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
                 )
             }
 
-            // Right: badge + optional arrow
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                // Blue badge with two lines (small caption + big minutes)
                 Box(
                     modifier = Modifier
                         .wrapContentSize()
@@ -80,7 +77,6 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
                             fontSize = 12.sp
                         )
 
-                        // Compute minutes until arrival and show user-friendly text
                         val minutesText = computeMinutesUntil(bus.arrivalTime)
 
                         Text(

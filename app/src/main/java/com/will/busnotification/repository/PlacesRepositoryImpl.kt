@@ -20,7 +20,6 @@ class PlacesRepositoryImpl @Inject constructor(
     override suspend fun searchPlaces(query: String): List<PlaceResult> {
         val apiKey = BuildConfig.GOOGLE_API_KEY
 
-        // Get current location (lat/lng) — caller must ensure permissions
         val loc = try {
             locationProvider.getLastKnownLocation()
         } catch (_: Throwable) {
@@ -29,7 +28,7 @@ class PlacesRepositoryImpl @Inject constructor(
 
         val request = RouteRequest(
             origin = (
-                    AdressRequest(query)
+                    AdressRequest("Rua são ladislau, 141")
             ),
             destination = (
                     AdressRequest(query)
@@ -46,7 +45,6 @@ class PlacesRepositoryImpl @Inject constructor(
             val response: PlacesResponse = apiService.searchPlaces(apiKey = apiKey, request = request)
             return response.results
         } catch (e: HttpException) {
-            // Try to log the server error body for 4xx/5xx
             val errBody = try {
                 e.response()?.errorBody()?.string()
             } catch (_: Throwable) {

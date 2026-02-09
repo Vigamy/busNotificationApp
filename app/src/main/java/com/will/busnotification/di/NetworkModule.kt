@@ -22,7 +22,6 @@ object NetworkModule {
             .build()
 
         return Retrofit.Builder()
-            // Routes API uses routes.googleapis.com
             .baseUrl("https://routes.googleapis.com/")
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
