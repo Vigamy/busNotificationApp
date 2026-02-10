@@ -4,7 +4,7 @@ import android.util.Log
 import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.dto.AdressRequest
 import com.will.busnotification.data.dto.PlaceResult
-import com.will.busnotification.data.dto.PlacesResponse
+import com.will.busnotification.data.dto.places.PlacesResponse
 import com.will.busnotification.data.dto.RouteRequest
 import com.will.busnotification.data.dto.TransitPreferences
 import com.will.busnotification.data.network.GooglePlacesApiService
