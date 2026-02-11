@@ -6,12 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,111 +30,89 @@ fun NotifiedBusComponent(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFC7DFFE) // light blue background
-        ),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFC7DFFE)),
         shape = RoundedCornerShape(12.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-
-            // Top-center small avatar badge
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = (-12).dp)
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(Color.White),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = bus.lineShortName.takeIf { it.isNotEmpty() }?.firstOrNull()?.toString() ?: "B",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2C3ED6)
-                )
-            }
-
-            // Time badge (top-right)
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color(0xFF2C3ED6))
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = bus.arrivalTime,
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Top row: line name + time badge
             Row(
                 modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
             ) {
-                // Left icon circle
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.White),
-                    contentAlignment = Alignment.Center
+                // Left: bus icon + line name
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
                 ) {
-                    // Use a simple emoji as a fallback for the bus icon to avoid requiring
-                    // the material-icons-extended dependency in the project.
+                    Text(text = "🚌", fontSize = 24.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "🚌",
-                        fontSize = 22.sp,
-                        color = Color.Black
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column {
-                    // Large line name
-                    Text(
-                        text = bus.lineName,
-                        fontSize = 26.sp,
+                        text = bus.lineShortName,
+                        fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Black
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(6.dp))
-
-                    // Route (departure -> destination)
+                // Right: time badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF2C3ED6))
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text(
-                        text = "${bus.departureStop} → ${bus.arrivalStop}",
+                        text = bus.arrivalTime,
+                        color = Color.White,
                         fontSize = 16.sp,
-                        color = Color(0xFF1F2933),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Large address / street line at bottom
+            // Route: departure → arrival
+            Text(
+                text = "${bus.departureStop} → ${bus.arrivalStop}",
+                fontSize = 14.sp,
+                color = Color(0xFF1F2933),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Destination street
             Text(
                 text = bus.destination,
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(top = 8.dp),
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 color = Color(0xFF0F1720),
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(bottom = 12.dp)
             )
+
+            // Bottom info: today's times
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Hoje, ${bus.departureTime}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF1F2933)
+                )
+                Text(
+                    text = "Hoje, ${bus.arrivalTime}",
+                    fontSize = 12.sp,
+                    color = Color(0xFF1F2933)
+                )
+            }
         }
     }
 }

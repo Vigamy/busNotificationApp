@@ -85,11 +85,7 @@ fun AddBusScreen(
                                 modifier = Modifier.padding(end = 12.dp)
                             )
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(text = place.name, fontWeight = FontWeight.SemiBold)
-                                // PlaceResult has no `vicinity`; show coordinates as subtitle instead
-                                val lat = place.geometry.location.lat
-                                val lng = place.geometry.location.lng
-                                Text(text = "${lat}, ${lng}", style = MaterialTheme.typography.bodySmall)
+                                Text(text = place.lineName, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }

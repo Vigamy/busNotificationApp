@@ -3,7 +3,7 @@ package com.will.busnotification.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.will.busnotification.data.dto.PlaceResult
+import com.will.busnotification.data.model.TransitSegment
 import com.will.busnotification.repository.PlacesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -28,8 +28,8 @@ class AddBusViewModel @Inject constructor(
     private val _isSearching = MutableStateFlow(false)
     val isSearching: StateFlow<Boolean> = _isSearching.asStateFlow()
 
-    private val _searchResults = MutableStateFlow<List<PlaceResult>>(emptyList())
-    val searchResults: StateFlow<List<PlaceResult>> = _searchResults.asStateFlow()
+    private val _searchResults = MutableStateFlow<List<TransitSegment>>(emptyList())
+    val searchResults: StateFlow<List<TransitSegment>> = _searchResults.asStateFlow()
 
     init {
         _searchQuery
@@ -51,6 +51,7 @@ class AddBusViewModel @Inject constructor(
                             _isSearching.value = false
                         }
                     }
+                    Log.d("Google API response", "${_searchResults.value}")
                 }
             }
             .launchIn(viewModelScope)

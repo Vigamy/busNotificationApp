@@ -1,29 +1,24 @@
 package com.will.busnotification.data.dto
 
-// Request shape matching Google Routes API (computeRoutes) — use location.latLng
+/**
+ * Requisição para a Google Routes API
+ * @param origin Localização de origem (endereço ou coordenadas)
+ * @param destination Localização de destino (endereço ou coordenadas)
+ * @param travelMode Modo de viagem (ex: TRANSIT, DRIVE)
+ * @param computeAlternativeRoutes Se deve calcular rotas alternativas
+ * @param transitPreferences Preferências para transporte público
+ */
 data class RouteRequest(
-    val origin: RouteLocation,
-    val destination: RouteLocation,
+    val origin: AdressRequest,
+    val destination: AdressRequest,
     val travelMode: String = "TRANSIT",
     val computeAlternativeRoutes: Boolean = true,
     val transitPreferences: TransitPreferences? = null
 )
 
-// Wrapper for location with latLng
-data class RouteLocation(
-    val location: LocationLatLng
-)
-
-data class LocationLatLng(
-    val latLng: LatLng
-)
-
-data class LatLng(
-    val latitude: Double,
-    val longitude: Double
-)
-
-// Transit preferences
+/**
+ * Preferências para cálculo de rotas de transporte público
+ */
 data class TransitPreferences(
     val routingPreference: String,
     val allowedTravelModes: List<String>
