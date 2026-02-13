@@ -3,10 +3,13 @@ package com.will.busnotification.repository
 import android.util.Log
 import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.dto.AdressRequest
+import com.will.busnotification.data.dto.DirectionsResponseDto
 import com.will.busnotification.data.dto.PlaceResult
-import com.will.busnotification.data.dto.PlacesResponse
 import com.will.busnotification.data.dto.RouteRequest
+import com.will.busnotification.data.dto.TransitDetailsDto
 import com.will.busnotification.data.dto.TransitPreferences
+import com.will.busnotification.data.mapper.toTransitSegments
+import com.will.busnotification.data.model.TransitSegment
 import com.will.busnotification.data.network.GooglePlacesApiService
 import retrofit2.HttpException
 import java.io.IOException
@@ -17,7 +20,7 @@ class PlacesRepositoryImpl @Inject constructor(
     private val locationProvider: LocationProvider
 ) : PlacesRepository {
 
-    override suspend fun searchPlaces(query: String): List<PlaceResult> {
+    override suspend fun searchPlaces(query: String): List<TransitSegment> {
         val apiKey = BuildConfig.GOOGLE_API_KEY
 
         val loc = try {
@@ -42,8 +45,8 @@ class PlacesRepositoryImpl @Inject constructor(
         )
 
         try {
-            val response: PlacesResponse = apiService.searchPlaces(apiKey = apiKey, request = request)
-            return response.results
+            val response: DirectionsResponseDto = apiService.searchPlaces(apiKey = apiKey, request = request)
+            return response.toTransitSegments()
         } catch (e: HttpException) {
             val errBody = try {
                 e.response()?.errorBody()?.string()
