@@ -4,7 +4,7 @@ import com.will.busnotification.data.dto.DirectionsResponseDto
 import com.will.busnotification.data.model.TransitSegment
 
 fun DirectionsResponseDto.toTransitSegments(): List<TransitSegment> {
-    return routes.flatMap { route ->
+    return routes?.flatMap { route ->
         route.legs.flatMap { leg ->
             leg.steps.mapNotNull { step ->
                 val td = step.transitDetails ?: return@mapNotNull null
@@ -21,5 +21,5 @@ fun DirectionsResponseDto.toTransitSegments(): List<TransitSegment> {
                 )
             }
         }
-    }
+    } ?: emptyList()
 }
