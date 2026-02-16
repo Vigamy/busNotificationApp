@@ -1,5 +1,6 @@
 package com.will.busnotification.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.api.GoogleApiInstance
@@ -90,6 +91,7 @@ class BusViewModel : ViewModel() {
                     if (response.isSuccessful) {
                         response.body()?.let {
                             _busList.value = it.toBusList()
+                            Log.d("BusViewModel", _busList.value.toString())
                         }
                     }
                 }
@@ -97,6 +99,7 @@ class BusViewModel : ViewModel() {
                 override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
                     if (p1.message != null) {
                         println(p1.message)
+                        Log.d("BusViewModel", p1.message.toString())
                     }
                 }
             })
