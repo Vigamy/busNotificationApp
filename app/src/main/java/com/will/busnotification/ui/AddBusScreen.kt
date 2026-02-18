@@ -35,6 +35,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.ui.components.HeaderComponent
 import com.will.busnotification.viewmodel.AddBusViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +64,7 @@ fun AddBusScreen(
             onQueryChange = viewModel::onSearchQueryChange,
             onSearch = {},
             active = searchResults.isNotEmpty() || searchQuery.isNotBlank(),
-            onActiveChange = {},
+            onActiveChange = { },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Pesquisar") },
             placeholder = { Text("Digite o destino") }
         ) {
@@ -80,7 +82,12 @@ fun AddBusScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 6.dp)
-                                .clickable { /* TODO: Ação ao clicar no resultado */ },
+                                .clickable {
+                                    val encodedLineName = URLEncoder.encode(place.lineName, StandardCharsets.UTF_8.toString())
+                                    val encodedDepartureStop = URLEncoder.encode(place.departureStop, StandardCharsets.UTF_8.toString())
+                                    val encodedArrivalStop = URLEncoder.encode(place.arrivalStop, StandardCharsets.UTF_8.toString())
+                                    navController.navigate("notificationSetup/${place.lineCode}/$encodedLineName/$encodedDepartureStop/$encodedArrivalStop/${place.arrivalTime}")
+                                },
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                         ) {
