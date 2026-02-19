@@ -40,7 +40,7 @@ import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBusScreen(
+fun AddNotificationScreen(
     navController: NavHostController,
     viewModel: AddBusViewModel = hiltViewModel()
 ) {
@@ -103,7 +103,9 @@ fun AddBusScreen(
                                     modifier = Modifier.padding(end = 12.dp)
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = place.lineName, fontWeight = FontWeight.SemiBold)
+                                    Text(text = place.lineCode, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(text = place.lineName.split("/").first(), fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -119,7 +121,7 @@ fun AddBusScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun AddBusScreenPreview() {
+fun AddNotificationScreenPreview() {
     // Nota: O preview não fará chamadas de API reais.
-    AddBusScreen(navController = rememberNavController())
+    AddNotificationScreen(navController = rememberNavController())
 }
