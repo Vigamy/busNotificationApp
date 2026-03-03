@@ -1,6 +1,7 @@
 package com.will.busnotification.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,10 +18,14 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Locale
 
 @Composable
 fun BusInfoCard(
@@ -80,51 +86,75 @@ fun BusInfoCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationSettingsCard() {
-    var onlyWeekdays by remember { mutableStateOf(true) }
-    var lessThan10min by remember { mutableStateOf(false) }
+    var selectedHour by remember { mutableStateOf(8) }
+    var selectedMinute by remember { mutableStateOf(0) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
+    val selectedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(Color(0xFFE0EAFC))
+            .clickable { showTimePicker = true }
             .padding(16.dp)
     ) {
-        Text("Receber notificações entre", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            TimeSelector(time = "00:00")
-            Text(text = "-", fontSize = 24.sp)
-            TimeSelector(time = "00:00")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = onlyWeekdays,
-                onCheckedChange = { onlyWeekdays = it }
-            )
-            Column {
-                Text("Somente dias úteis")
-                Text("Segunda à sexta", style = MaterialTheme.typography.bodySmall)
-            }
-        }
+        Text("Horário da notificação", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Spacer(modifier = Modifier.height(12.dp))
+        TimeSelector(time = selectedTime)
         Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = lessThan10min,
-                onCheckedChange = { lessThan10min = it }
-            )
-            Text("Notificar apenas quando o ônibus estiver a menos de 10min")
-        }
+        Text(
+            text = "Toque no card para escolher o horário",
+            style = MaterialTheme.typography.bodySmall
+        )
     }
+
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = selectedHour,
+            initialMinute = selectedMinute,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            state = timePickerState,
+            onConfirm = {
+                selectedHour = timePickerState.hour
+                selectedMinute = timePickerState.minute
+                showTimePicker = false
+            },
+            onDismiss = { showTimePicker = false }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimePickerDialog(
+    state: TimePickerState,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        text = {
+            TimePicker(state = state)
+        }
+    )
 }
 
 @Composable
