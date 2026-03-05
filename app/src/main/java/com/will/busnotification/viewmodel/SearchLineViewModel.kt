@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @OptIn(FlowPreview::class)
 @HiltViewModel
-class AddBusViewModel @Inject constructor(
+class SearchLineViewModel @Inject constructor(
     private val placesRepository: PlacesRepository
 ) : ViewModel() {
 

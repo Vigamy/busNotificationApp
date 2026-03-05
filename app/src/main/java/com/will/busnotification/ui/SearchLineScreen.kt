@@ -34,15 +34,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.ui.components.HeaderComponent
-import com.will.busnotification.viewmodel.AddBusViewModel
+import com.will.busnotification.viewmodel.SearchLineViewModel
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBusScreen(
+fun SearchLineScreen(
     navController: NavHostController,
-    viewModel: AddBusViewModel = hiltViewModel()
+    viewModel: SearchLineViewModel = hiltViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
@@ -86,7 +86,7 @@ fun AddBusScreen(
                                     val encodedLineName = URLEncoder.encode(place.lineName, StandardCharsets.UTF_8.toString())
                                     val encodedDepartureStop = URLEncoder.encode(place.departureStop, StandardCharsets.UTF_8.toString())
                                     val encodedArrivalStop = URLEncoder.encode(place.arrivalStop, StandardCharsets.UTF_8.toString())
-                                    navController.navigate("notificationSetup/${place.lineCode}/$encodedLineName/$encodedDepartureStop/$encodedArrivalStop/${place.arrivalTime}")
+                                    navController.navigate("notificationSetup/${place.lineCode}/$encodedLineName/$encodedDepartureStop/$encodedArrivalStop/${place.arrivalTime}/${place.headsign}")
                                 },
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -103,7 +103,9 @@ fun AddBusScreen(
                                     modifier = Modifier.padding(end = 12.dp)
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(text = place.lineName, fontWeight = FontWeight.SemiBold)
+                                    Text(text = place.lineCode, fontWeight = FontWeight.Bold)
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(text = place.lineName.split("/").first(), fontWeight = FontWeight.SemiBold)
                                 }
                             }
                         }
@@ -119,7 +121,7 @@ fun AddBusScreen(
 
 @Preview(showBackground = true)
 @Composable
-fun AddBusScreenPreview() {
+fun SearchLineScreenPreview() {
     // Nota: O preview não fará chamadas de API reais.
-    AddBusScreen(navController = rememberNavController())
+    SearchLineScreen(navController = rememberNavController())
 }

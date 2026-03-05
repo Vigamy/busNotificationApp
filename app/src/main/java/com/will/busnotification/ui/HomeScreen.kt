@@ -45,7 +45,7 @@ fun HomeScreen(
     val buses by viewModel.busList.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadBus()
+        viewModel.loadBusFromFirebase()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
