@@ -1,21 +1,34 @@
-# Download do APK via Internet
+# Download do APK via GitHub Releases
 
-Este repositório agora possui uma GitHub Action para gerar um APK e publicar em um caminho fixo no branch.
+Este repositório possui uma GitHub Action para gerar o APK automaticamente e publicar na **release `latest`**.
 
-## Como gerar
+## Como funciona
 
-1. Vá em **Actions** no GitHub.
-2. Execute o workflow **Build and publish APK** manualmente.
-3. Ao final, ele salva o arquivo em `app/release/app-release.apk` no branch atual.
+- O workflow `Build and publish APK release` roda automaticamente em cada push na `main`.
+- Também pode ser executado manualmente pelo botão **Run workflow** em **Actions**.
+- Ao final, ele atualiza a release `latest` com o arquivo `app-release.apk`.
 
-## URL de download
+## URL fixa de download
 
-Depois da execução, você poderá baixar em:
+Use sempre esta URL (sem trocar owner/repo):
 
-`https://raw.githubusercontent.com/<OWNER>/<REPO>/<BRANCH>/app/release/app-release.apk`
+`https://github.com/<OWNER>/<REPO>/releases/download/latest/app-release.apk`
 
-Exemplo de formato:
+Exemplo:
 
-`https://raw.githubusercontent.com/Luminary-Team/eden-mobile/refs/heads/main/app/release/app-release.apk`
+`https://github.com/Luminary-Team/eden-mobile/releases/download/latest/app-release.apk`
 
-> Observação: o workflow gera a variante **debug** (`assembleDebug`) para garantir instalação fácil sem configuração de assinatura de release.
+## Pré-requisito obrigatório
+
+Se o projeto usa Firebase e o arquivo `app/google-services.json` não está versionado, configure o secret:
+
+- Nome: `GOOGLE_SERVICES_JSON`
+- Valor: conteúdo **base64** do arquivo `app/google-services.json`
+
+Gerar base64 localmente:
+
+```bash
+base64 -w 0 app/google-services.json
+```
+
+> Observação: o workflow gera a variante **debug** (`assembleDebug`) para não depender de assinatura de release.

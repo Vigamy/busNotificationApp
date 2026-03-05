@@ -1,13 +1,16 @@
-name: Build and publish APK
+name: Build and publish APK release
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: apk-release-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-publish:
@@ -16,28 +19,49 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
+          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Copy APK to stable download path
+      - name: Prepare Firebase config
+        shell: bash
         run: |
-          mkdir -p app/release
-          cp app/build/outputs/apk/debug/app-debug.apk app/release/app-release.apk
+          set -euo pipefail
 
-      - name: Commit APK to repository
-        uses: stefanzweifel/git-auto-commit-action@v5
+          if [[ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]]; then
+            echo "Decoding google-services.json from secret"
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+          elif [[ -f app/google-services.json ]]; then
+            echo "Using repository google-services.json"
+          else
+            echo "::error::Missing Firebase config. Configure GOOGLE_SERVICES_JSON secret with base64(app/google-services.json)."
+            exit 1
+          fi
+
+      - name: Build APK
+        run: ./gradlew --no-daemon clean assembleDebug
+
+      - name: Prepare release asset
+        run: |
+          mkdir -p release-assets
+          cp app/build/outputs/apk/debug/app-debug.apk release-assets/app-release.apk
+
+      - name: Publish/Update latest release
+        uses: ncipollo/release-action@v1
         with:
-          commit_message: 'ci: update downloadable APK [skip ci]'
-          file_pattern: app/release/app-release.apk
+          tag: latest
+          name: Latest APK
+          body: |
+            APK mais recente gerado automaticamente pelo workflow.
+            Commit: ${{ github.sha }}
+          artifacts: release-assets/app-release.apk
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
