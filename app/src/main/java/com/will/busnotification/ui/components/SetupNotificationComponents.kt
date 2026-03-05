@@ -1,6 +1,7 @@
 package com.will.busnotification.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,12 +17,15 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.will.busnotification.data.model.NotificationWindow
+import java.util.Locale
 
 @Composable
 fun BusInfoCard(
@@ -80,10 +86,33 @@ fun BusInfoCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NotificationSettingsCard() {
-    var onlyWeekdays by remember { mutableStateOf(true) }
-    var lessThan10min by remember { mutableStateOf(false) }
+fun NotificationSettingsCard(
+    initialWindow: NotificationWindow = NotificationWindow(8, 0, 18, 0),
+    onNotificationWindowChanged: (NotificationWindow) -> Unit = {}
+) {
+    var startHour by remember { mutableStateOf(initialWindow.startHour) }
+    var startMinute by remember { mutableStateOf(initialWindow.startMinute) }
+    var endHour by remember { mutableStateOf(initialWindow.endHour) }
+    var endMinute by remember { mutableStateOf(initialWindow.endMinute) }
+
+    var showTimePicker by remember { mutableStateOf(false) }
+    var editingStartTime by remember { mutableStateOf(true) }
+
+    val startTime = String.format(Locale.getDefault(), "%02d:%02d", startHour, startMinute)
+    val endTime = String.format(Locale.getDefault(), "%02d:%02d", endHour, endMinute)
+
+    LaunchedEffect(startHour, startMinute, endHour, endMinute) {
+        onNotificationWindowChanged(
+            NotificationWindow(
+                startHour = startHour,
+                startMinute = startMinute,
+                endHour = endHour,
+                endMinute = endMinute
+            )
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -99,40 +128,82 @@ fun NotificationSettingsCard() {
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TimeSelector(time = "00:00")
+            TimeSelector(
+                time = startTime,
+                onClick = {
+                    editingStartTime = true
+                    showTimePicker = true
+                }
+            )
+
             Text(text = "-", fontSize = 24.sp)
-            TimeSelector(time = "00:00")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-        Spacer(modifier = Modifier.height(16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = onlyWeekdays,
-                onCheckedChange = { onlyWeekdays = it }
+
+            TimeSelector(
+                time = endTime,
+                onClick = {
+                    editingStartTime = false
+                    showTimePicker = true
+                }
             )
-            Column {
-                Text("Somente dias úteis")
-                Text("Segunda à sexta", style = MaterialTheme.typography.bodySmall)
-            }
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Checkbox(
-                checked = lessThan10min,
-                onCheckedChange = { lessThan10min = it }
-            )
-            Text("Notificar apenas quando o ônibus estiver a menos de 10min")
-        }
+    }
+
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = if (editingStartTime) startHour else endHour,
+            initialMinute = if (editingStartTime) startMinute else endMinute,
+            is24Hour = true
+        )
+
+        TimePickerDialog(
+            state = timePickerState,
+            onConfirm = {
+                if (editingStartTime) {
+                    startHour = timePickerState.hour
+                    startMinute = timePickerState.minute
+                } else {
+                    endHour = timePickerState.hour
+                    endMinute = timePickerState.minute
+                }
+                showTimePicker = false
+            },
+            onDismiss = { showTimePicker = false }
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TimeSelector(time: String) {
+private fun TimePickerDialog(
+    state: TimePickerState,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        },
+        text = {
+            TimePicker(state = state)
+        }
+    )
+}
+
+@Composable
+fun TimeSelector(time: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(Color.White)
+            .clickable(onClick = onClick)
             .padding(horizontal = 24.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -141,9 +212,9 @@ fun TimeSelector(time: String) {
 }
 
 @Composable
-fun SaveChangesButton() {
+fun SaveChangesButton(onClick: () -> Unit) {
     Button(
-        onClick = { /* TODO */ },
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp),
