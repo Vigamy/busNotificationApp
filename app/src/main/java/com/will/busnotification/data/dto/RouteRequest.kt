@@ -1,5 +1,7 @@
 package com.will.busnotification.data.dto
 
+import java.time.LocalDate
+
 /**
  * Requisição para a Google Routes API
  * @param origin Localização de origem (endereço ou coordenadas)
@@ -12,6 +14,7 @@ data class RouteRequest(
     val origin: AdressRequest,
     val destination: AdressRequest,
     val travelMode: String = "TRANSIT",
+    val departureTime: String? = "${LocalDate.now()}T8:00:00Z",
     val computeAlternativeRoutes: Boolean = true,
     val transitPreferences: TransitPreferences? = null
 )
