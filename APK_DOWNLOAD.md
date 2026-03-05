@@ -5,7 +5,7 @@ Este repositório possui uma GitHub Action para gerar APK e publicar em caminho 
 ## Quando roda
 
 - `push` na `main`
-- `pull_request` para `main`
+- `pull_request` para `main` (opened/synchronize/reopened)
 - execução manual (`workflow_dispatch`)
 
 ## Pré-requisito (obrigatório)

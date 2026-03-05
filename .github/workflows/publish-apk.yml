@@ -1,10 +1,15 @@
 name: Build and publish APK
 
+concurrency:
+  group: publish-apk-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
   workflow_dispatch:
@@ -58,7 +63,7 @@ jobs:
           path: app/release/app-release.apk
 
       - name: Commit APK to repository (push main/manual)
-        if: github.event_name != 'pull_request'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: 'ci: update downloadable APK [skip ci]'
