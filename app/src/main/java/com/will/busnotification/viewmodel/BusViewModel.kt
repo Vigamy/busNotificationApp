@@ -29,48 +29,40 @@ class BusViewModel : ViewModel() {
 
     fun loadBusFromFirebase() {
         val locationsRef = firestore.collection("locations")
-        val originDoc = locationsRef.document("origin")
-        val destDoc = locationsRef.document("destination")
+        val lineInfo = locationsRef.document("297A-10")
 
-        originDoc.get().addOnSuccessListener { originSnap: DocumentSnapshot ->
-            destDoc.get().addOnSuccessListener { destSnap: DocumentSnapshot ->
-                val originAddress = originSnap.getString("address") ?: ""
-                val destAddress = destSnap.getString("address") ?: ""
+        lineInfo.get().addOnSuccessListener { lineSnap: DocumentSnapshot ->
+            val originAddress = lineSnap.getString("departureStop") ?: ""
+            val destAddress = lineSnap.getString("destination") ?: ""
 
-//                // Ajuste aqui os parâmetros de LocationInput conforme sua implementação real.
-//                val originInput = LocationInput(address = originAddress)
-//                val destinationInput = LocationInput(address = destAddress)
-
-                val requestBody = RouteRequest(
-                    origin = AdressRequest(originAddress),
-                    destination = AdressRequest(destAddress),
-                    travelMode = "TRANSIT",
-                    computeAlternativeRoutes = true,
-                    transitPreferences = TransitPreferences(
-                        routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
-                        allowedTravelModes = listOf("BUS")
-                    )
+            val requestBody = RouteRequest(
+                origin = AdressRequest(originAddress),
+                destination = AdressRequest(destAddress),
+                travelMode = "TRANSIT",
+                computeAlternativeRoutes = true,
+                transitPreferences = TransitPreferences(
+                    routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
+                    allowedTravelModes = listOf("BUS")
                 )
+            )
 
-                GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
-                    .enqueue(object : Callback<RouteResponse> {
-                        override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
-                            if (response.isSuccessful) {
-                                response.body()?.let {
-                                    _busList.value = it.toBusList()
-                                }
+            GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
+                .enqueue(object : Callback<RouteResponse> {
+                    override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
+                        if (response.isSuccessful) {
+                            response.body()?.let {
+                                _busList.value = it.toBusList()
                             }
                         }
+                    }
 
-                        override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
-                            p1.message?.let { println(it) }
-                        }
-                    })
-            }.addOnFailureListener { e: Exception ->
-                println("Erro ao ler destination: ${e.message}")
-            }
+                    override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
+                        p1.message?.let { println(it) }
+                    }
+                })
+
         }.addOnFailureListener { e: Exception ->
-            println("Erro ao ler origin: ${e.message}")
+            println("Erro ao ler destination: ${e.message}")
         }
     }
 
