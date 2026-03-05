@@ -2,6 +2,12 @@
 
 Este repositório possui uma GitHub Action para gerar APK e publicar em caminho fixo no branch.
 
+## Quando roda
+
+- `push` na `main`
+- `pull_request` para `main`
+- execução manual (`workflow_dispatch`)
+
 ## Pré-requisito (obrigatório)
 
 Como o projeto usa Firebase/Google Services, configure antes o secret do repositório:
@@ -11,20 +17,18 @@ Como o projeto usa Firebase/Google Services, configure antes o secret do reposit
 
 Caminho no GitHub: **Settings → Secrets and variables → Actions → New repository secret**.
 
-## Como gerar
+## Como baixar
 
-1. Vá em **Actions** no GitHub.
-2. Execute o workflow **Build and publish APK** manualmente.
-3. Ao final, ele salva o arquivo em `app/release/app-release.apk` no branch atual.
+### Push na main (link público/raw)
 
-## URL de download
+Depois da execução em `push` na `main`, o APK é commitado em `app/release/app-release.apk`.
 
-Depois da execução, você poderá baixar em:
+URL:
 
-`https://raw.githubusercontent.com/<OWNER>/<REPO>/<BRANCH>/app/release/app-release.apk`
+`https://raw.githubusercontent.com/<OWNER>/<REPO>/refs/heads/main/app/release/app-release.apk`
 
-Exemplo de formato:
+### Pull Request para main (artifact da Action)
 
-`https://raw.githubusercontent.com/Luminary-Team/eden-mobile/refs/heads/main/app/release/app-release.apk`
+Em `pull_request`, o workflow gera e publica o APK como artifact (`app-release`) no run da Action.
 
-> Observação: o workflow gera a variante **debug** (`assembleDebug`) para simplificar a instalação sem assinatura release.
+> Observação: em PR não é feito commit automático para evitar problemas de permissão do `GITHUB_TOKEN`.
