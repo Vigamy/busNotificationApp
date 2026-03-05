@@ -27,6 +27,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -92,10 +93,10 @@ fun NotificationSettingsCard(
     initialWindow: NotificationWindow = NotificationWindow(8, 0, 18, 0),
     onNotificationWindowChanged: (NotificationWindow) -> Unit = {}
 ) {
-    var startHour by remember { mutableStateOf(initialWindow.startHour) }
-    var startMinute by remember { mutableStateOf(initialWindow.startMinute) }
-    var endHour by remember { mutableStateOf(initialWindow.endHour) }
-    var endMinute by remember { mutableStateOf(initialWindow.endMinute) }
+    var startHour by remember { mutableIntStateOf(initialWindow.startHour) }
+    var startMinute by remember { mutableIntStateOf(initialWindow.startMinute) }
+    var endHour by remember { mutableIntStateOf(initialWindow.endHour) }
+    var endMinute by remember { mutableIntStateOf(initialWindow.endMinute) }
 
     var showTimePicker by remember { mutableStateOf(false) }
     var editingStartTime by remember { mutableStateOf(true) }

@@ -2,17 +2,9 @@ package com.will.busnotification.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.ktx.firestore
-import com.will.busnotification.data.model.NotificationWindow
-
-data class NotificationSetupPayload(
-    val lineCode: String,
-    val lineName: String,
-    val departureStop: String,
-    val arrivalStop: String,
-    val notificationWindow: NotificationWindow
-)
+import com.google.firebase.ktx.Firebase
+import com.will.busnotification.data.dto.NotificationSetupPayload
 
 interface NotificationScheduleManager {
     fun scheduleNotificationWindow(payload: NotificationSetupPayload)
@@ -44,17 +36,20 @@ class NotificationSetupViewModel : ViewModel() {
             "startMinute" to payload.notificationWindow.startMinute,
             "endHour" to payload.notificationWindow.endHour,
             "endMinute" to payload.notificationWindow.endMinute,
+            "destination" to payload.destination,
             "createdAt" to System.currentTimeMillis()
         )
 
-        firestore.collection("notification_setups")
-            .add(firestorePayload)
+        firestore.collection("locations").document(firestorePayload["lineCode"].toString())
+            .set(firestorePayload)
             .addOnSuccessListener {
                 scheduleManager.scheduleNotificationWindow(payload)
                 onSuccess()
+                Log.d("NotificationSetupViewModel", "Notification setup saved successfully")
             }
             .addOnFailureListener { error ->
                 onError(error)
+                Log.d("NotificationSetupViewModel", "Notification setup save failed: $error")
             }
     }
 }

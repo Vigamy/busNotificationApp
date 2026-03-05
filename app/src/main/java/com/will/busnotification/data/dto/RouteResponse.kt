@@ -1,15 +1,15 @@
 package com.will.busnotification.data.dto
 
 data class RouteResponse(
-    val routes: List<Route>
+    val routes: List<Route>?
 )
 
 data class Route(
-    val legs: List<Leg>
+    val legs: List<Leg>?
 )
 
 data class Leg(
-    val steps: List<Step>
+    val steps: List<Step>?
 )
 
 data class Step(
@@ -33,7 +33,16 @@ data class StopDetails(
 
 data class StopInfo(
     val name: String,
-    val location: String
+    val location: Location
+)
+
+data class Location(
+    val latLng: LatLng
+)
+
+data class LatLng(
+    val latitude: Double,
+    val longitude: Double
 )
 
 data class LocalizedValues(
@@ -56,7 +65,7 @@ data class TransitLine(
     val headsign: String?,
     val color: String,
     val textColor: String,
-    val agencies: List<Agency>,
+    val agencies: List<Agency>?,
     val vehicle: Vehicle
 )
 
