@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.ui.components.HeaderComponent
@@ -22,12 +22,12 @@ import com.will.busnotification.viewmodel.BusViewModel
 @Composable
 fun NotificationHistoryScreen(
     navController: NavHostController,
-    viewModel: BusViewModel = viewModel()
+    viewModel: BusViewModel = hiltViewModel()
 ) {
-    val buses by viewModel.notifiedBusList.collectAsState()
+    val buses by viewModel.busList.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadNotifiedBuses()
+        viewModel.loadBusFromFirebase()
     }
 
     Column(modifier = Modifier.fillMaxSize()) {

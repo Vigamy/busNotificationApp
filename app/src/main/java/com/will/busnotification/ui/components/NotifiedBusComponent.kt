@@ -22,11 +22,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.will.busnotification.data.model.Bus
+import com.will.busnotification.data.model.TransitSegment
 
 @Composable
 fun NotifiedBusComponent(
-    bus: Bus,
+    bus: TransitSegment,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -52,7 +52,7 @@ fun NotifiedBusComponent(
                     Text(text = "🚌", fontSize = 24.sp)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = bus.lineShortName,
+                        text = bus.lineCode,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color.Black
@@ -88,7 +88,7 @@ fun NotifiedBusComponent(
 
             // Destination street
             Text(
-                text = bus.destination,
+                text = bus.headsign,
                 fontSize = 16.sp,
                 color = Color(0xFF0F1720),
                 maxLines = 2,
@@ -121,16 +121,15 @@ fun NotifiedBusComponent(
 @Composable
 fun NotifiedBusComponentPreview() {
     NotifiedBusComponent(
-        bus = Bus(
+        bus = TransitSegment(
+            lineCode = "118",
             lineName = "118Y",
-            lineShortName = "118",
-            destination = "Rua Willamy Ricardo Pinatto Andreotti",
+            headsign = "Rua Willamy Ricardo Pinatto Andreotti",
             departureStop = "ponto 1",
             departureTime = "09:50",
             arrivalStop = "ponto 2",
             arrivalTime = "06:16",
-            color = 0xFFC7DFFE.toInt(),
-            textColor = 0xFF000000.toInt()
+            stopCount = 3
         )
     )
 }

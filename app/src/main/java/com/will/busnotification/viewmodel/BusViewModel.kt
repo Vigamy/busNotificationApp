@@ -2,123 +2,138 @@ package com.will.busnotification.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import com.will.busnotification.BuildConfig
-import com.will.busnotification.data.api.GoogleApiInstance
+import com.will.busnotification.data.dto.AdressRequest
 import com.will.busnotification.data.dto.RouteRequest
-import com.will.busnotification.data.dto.RouteResponse
 import com.will.busnotification.data.dto.TransitPreferences
-import com.will.busnotification.data.model.Bus
-import com.will.busnotification.repository.toBusList
+import com.will.busnotification.data.model.TransitSegment
+import com.will.busnotification.data.network.GooglePlacesApiService
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.DocumentSnapshot
-import com.will.busnotification.data.dto.AdressRequest
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import retrofit2.HttpException
+import javax.inject.Inject
 
-class BusViewModel : ViewModel() {
-    private val _busList = MutableStateFlow<List<Bus>>(emptyList())
-    private val _notifiedBuses = MutableStateFlow<List<Bus>>(emptyList())
-    val busList: StateFlow<List<Bus>> = _busList
-    val notifiedBusList: StateFlow<List<Bus>> = _notifiedBuses
+@HiltViewModel
+class BusViewModel @Inject constructor(
+    private val apiService: GooglePlacesApiService
+) : ViewModel() {
+
+    private val _busList = MutableStateFlow<List<TransitSegment>>(emptyList())
+    val busList: StateFlow<List<TransitSegment>> = _busList.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val firestore = Firebase.firestore
 
+    companion object {
+        private const val TAG = "BusViewModel"
+    }
+
     fun loadBusFromFirebase() {
-        val locationsRef = firestore.collection("locations")
-        val lineInfo = locationsRef.document("297A-10")
+        viewModelScope.launch {
+            _isLoading.value = true
+            Log.d(TAG, "=== INICIANDO CARREGAMENTO DOS ÔNIBUS SALVOS ===")
 
-        lineInfo.get().addOnSuccessListener { lineSnap: DocumentSnapshot ->
-            val originAddress = lineSnap.getString("departureStop") ?: ""
-            val destAddress = lineSnap.getString("destination") ?: ""
+            try {
+                val snapshot = firestore.collection("locations").get().await()
+                val documents = snapshot.documents
+                Log.d(TAG, "Total de ônibus salvos no Firestore: ${documents.size}")
 
-            val requestBody = RouteRequest(
-                origin = AdressRequest(originAddress),
-                destination = AdressRequest(destAddress),
-                travelMode = "TRANSIT",
-                computeAlternativeRoutes = true,
-                transitPreferences = TransitPreferences(
-                    routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
-                    allowedTravelModes = listOf("BUS")
-                )
-            )
+                if (documents.isEmpty()) {
+                    Log.d(TAG, "Nenhum ônibus salvo encontrado.")
+                    _busList.value = emptyList()
+                    return@launch
+                }
 
-            GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
-                .enqueue(object : Callback<RouteResponse> {
-                    override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
-                        if (response.isSuccessful) {
-                            response.body()?.let {
-                                _busList.value = it.toBusList()
+                val results = mutableListOf<TransitSegment>()
+
+                for (doc in documents) {
+                    val lineCode = doc.getString("lineCode") ?: doc.id
+                    val departureStop = doc.getString("departureStop") ?: ""
+                    val destination = ("Terminal" + doc.getString("destination"))
+
+                    Log.d(TAG, "--- Processando linha: $lineCode ---")
+                    Log.d(TAG, "  Origem (departureStop): '$departureStop'")
+                    Log.d(TAG, "  Destino (destination): '$destination'")
+
+                    if (departureStop.isBlank() || destination.isBlank()) {
+                        Log.w(TAG, "  ⚠ Campos obrigatórios ausentes para linha '$lineCode' — pulando.")
+                        continue
+                    }
+
+                    val request = RouteRequest(
+                        origin = AdressRequest(departureStop),
+                        destination = AdressRequest(destination),
+                        travelMode = "TRANSIT",
+                        computeAlternativeRoutes = true,
+                        transitPreferences = TransitPreferences(
+                            routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
+                            allowedTravelModes = listOf("BUS")
+                        )
+                    )
+
+                    Log.d(TAG, "  Enviando requisição para Google Routes API...")
+                    Log.d(TAG, "  Request body: $request")
+
+                    try {
+                        val response = apiService.searchPlaces(
+                            apiKey = BuildConfig.GOOGLE_API_KEY,
+                            request = request
+                        )
+
+                        Log.d(TAG, "  Resposta recebida. Total de rotas: ${response.routes.size}")
+
+                        val firstSegment = response.routes
+                            .firstOrNull()
+                            ?.legs?.firstOrNull()
+                            ?.steps?.firstOrNull { it.transitDetails != null }
+                            ?.transitDetails
+                            ?.let { td ->
+                                TransitSegment(
+                                    lineCode = td.transitLine.nameShort,
+                                    lineName = td.transitLine.name,
+                                    headsign = td.headsign.orEmpty(),
+                                    departureStop = td.stopDetails.departureStop.name,
+                                    arrivalStop = td.stopDetails.arrivalStop.name,
+                                    departureTime = td.stopDetails.departureTime,
+                                    arrivalTime = td.stopDetails.arrivalTime,
+                                    stopCount = td.stopCount ?: 0
+                                )
                             }
+
+                        if (firstSegment != null) {
+                            Log.d(TAG, "  ✓ Próximo ônibus encontrado: ${firstSegment.lineCode} — ${firstSegment.lineName}")
+                            Log.d(TAG, "    Partida: ${firstSegment.departureStop} às ${firstSegment.departureTime}")
+                            Log.d(TAG, "    Chegada: ${firstSegment.arrivalStop} às ${firstSegment.arrivalTime}")
+                            results.add(firstSegment)
+                        } else {
+                            Log.w(TAG, "  ⚠ Nenhum segmento de ônibus encontrado na resposta para linha '$lineCode'.")
                         }
-                    }
 
-                    override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
-                        p1.message?.let { println(it) }
+                    } catch (e: HttpException) {
+                        val errBody = try { e.response()?.errorBody()?.string() } catch (_: Throwable) { "<erro ao ler body>" }
+                        Log.e(TAG, "  ✗ HttpException (${e.code()}) para linha '$lineCode': $errBody", e)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "  ✗ Erro inesperado ao buscar linha '$lineCode'", e)
                     }
-                })
+                }
 
-        }.addOnFailureListener { e: Exception ->
-            println("Erro ao ler destination: ${e.message}")
+                Log.d(TAG, "=== CARREGAMENTO CONCLUÍDO: ${results.size} ônibus carregados ===")
+                _busList.value = results
+
+            } catch (e: Exception) {
+                Log.e(TAG, "✗ Erro ao buscar documentos do Firestore", e)
+            } finally {
+                _isLoading.value = false
+            }
         }
-    }
-
-    fun loadBus() {
-        val requestBody = RouteRequest(
-            origin = AdressRequest("Rua Gen. Mello Rezende, 11"),
-            destination = AdressRequest("R. John Harrison"),
-            travelMode = "TRANSIT",
-            computeAlternativeRoutes = true,
-            transitPreferences = TransitPreferences(
-                routingPreference = "TRANSIT_ROUTING_PREFERENCE_UNSPECIFIED",
-                allowedTravelModes = listOf("BUS")
-            )
-        )
-        GoogleApiInstance.retrofit.getBus(requestBody, apiKey = BuildConfig.GOOGLE_API_KEY)
-            .enqueue(object : Callback<RouteResponse> {
-                override fun onResponse(call: Call<RouteResponse>, response: Response<RouteResponse>) {
-                    if (response.isSuccessful) {
-                        response.body()?.let {
-                            _busList.value = it.toBusList()
-                            Log.d("BusViewModel", _busList.value.toString())
-                        }
-                    }
-                }
-
-                override fun onFailure(p0: Call<RouteResponse>, p1: Throwable) {
-                    if (p1.message != null) {
-                        println(p1.message)
-                        Log.d("BusViewModel", p1.message.toString())
-                    }
-                }
-            })
-    }
-
-    fun loadNotifiedBuses() {
-        // Implement loading of notified buses from storage or database
-        _notifiedBuses.value = listOf(
-            // Example data
-            Bus(
-                "Bus 1", "Route A", "10:00 AM",
-                departureStop = "Main Street",
-                departureTime = "09:50 AM",
-                arrivalStop = "Central Station",
-                arrivalTime = "10:30 AM",
-                color = 0xFF2196F3.toInt(),
-                textColor = 0xFFFFFFFF.toInt()
-            ),
-            Bus(
-                "Bus 2", "Route B", "11:00 AM",
-                departureStop = "2nd Ave",
-                departureTime = "10:50 AM",
-                arrivalStop = "Downtown",
-                arrivalTime = "11:20 AM",
-                color = 0xFF4CAF50.toInt(),
-                textColor = 0xFF000000.toInt()
-            )
-        )
     }
 }
