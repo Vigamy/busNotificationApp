@@ -24,11 +24,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.will.busnotification.data.model.Bus
+import com.will.busnotification.data.model.TransitSegment
 import com.will.busnotification.util.computeMinutesUntil
 
 @Composable
-fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier) {
+fun BusItemComponent(bus: TransitSegment, hasArrow: Boolean,  modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(4.dp),
@@ -45,7 +45,7 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "${bus.lineShortName} - ${bus.destination}",
+                    text = "${bus.lineCode} - ${bus.headsign}",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
@@ -107,16 +107,15 @@ fun BusItemComponent(bus: Bus, hasArrow: Boolean,  modifier: Modifier = Modifier
 @Composable
 fun BusItemPreview() {
     BusItemComponent(
-        bus = Bus(
+        bus = TransitSegment(
+            lineCode = "42",
             lineName = "Some Line Full",
-            lineShortName = "42",
-            destination = "Central",
+            headsign = "Central",
             departureStop = "Stop A",
             departureTime = "10:00",
             arrivalStop = "Stop B",
             arrivalTime = "23:30",
-            color = 0xFF2E6FD6.toInt(),
-            textColor = 0xFFFFFFFF.toInt()
+            stopCount = 5
         ),
         hasArrow = true,
         modifier = Modifier.padding(8.dp)
