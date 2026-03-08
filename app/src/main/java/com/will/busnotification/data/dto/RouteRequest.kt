@@ -1,6 +1,7 @@
 package com.will.busnotification.data.dto
 
-import java.time.LocalDate
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Requisição para a Google Routes API
@@ -14,7 +15,9 @@ data class RouteRequest(
     val origin: AdressRequest,
     val destination: AdressRequest,
     val travelMode: String = "TRANSIT",
-    val departureTime: String? = "${LocalDate.now()}T8:00:00Z",
+    val departureTime: String? = OffsetDateTime.now()
+        .withNano(0)
+        .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
     val computeAlternativeRoutes: Boolean = true,
     val transitPreferences: TransitPreferences? = null
 )
