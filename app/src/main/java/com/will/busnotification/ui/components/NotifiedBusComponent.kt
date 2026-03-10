@@ -1,6 +1,5 @@
 package com.will.busnotification.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,23 +12,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.will.busnotification.R
 import com.will.busnotification.data.model.TransitSegment
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun NotifiedBusComponent(
@@ -39,10 +41,10 @@ fun NotifiedBusComponent(
     Card(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFAEC7E5)),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFAFC8E6)),
         shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 20.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -52,16 +54,16 @@ fun NotifiedBusComponent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.onibus),
+                    Icon(
+                        imageVector = Icons.Filled.DirectionsBus,
                         contentDescription = "Ônibus",
-                        modifier = Modifier.size(44.dp),
-                        colorFilter = ColorFilter.tint(Color.Black)
+                        tint = Color.Black,
+                        modifier = Modifier.size(48.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = bus.lineName.ifBlank { bus.lineCode },
-                        fontSize = 34.sp,
+                        text = bus.lineCode.ifBlank { bus.lineName },
+                        fontSize = 32.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         maxLines = 1,
@@ -71,15 +73,15 @@ fun NotifiedBusComponent(
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(Color(0xFF2F2DCC))
-                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                        .padding(horizontal = 18.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = bus.arrivalTime,
+                        text = bus.arrivalTime.toHourMinute(),
                         color = Color.White,
-                        fontSize = 24.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -89,7 +91,7 @@ fun NotifiedBusComponent(
 
             Text(
                 text = "${bus.departureStop} → ${bus.arrivalStop}",
-                fontSize = 24.sp,
+                fontSize = 21.sp,
                 color = Color.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -99,11 +101,25 @@ fun NotifiedBusComponent(
 
             Text(
                 text = bus.headsign,
-                fontSize = 24.sp,
+                fontSize = 21.sp,
                 color = Color.Black,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
+
+private fun String.toHourMinute(): String {
+    return runCatching {
+        Instant.parse(this)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("HH:mm"))
+    }.getOrElse {
+        if (contains('T') && length >= 16) {
+            substring(11, 16)
+        } else {
+            this
         }
     }
 }
