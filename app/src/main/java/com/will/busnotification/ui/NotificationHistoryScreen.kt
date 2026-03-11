@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -47,40 +47,40 @@ fun NotificationHistoryScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFEFEFEF))
+            .background(Color(0xFFF1F1F1))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF5D8FCD))
-                .padding(horizontal = 18.dp, vertical = 28.dp),
+                .padding(horizontal = 10.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = { navController.popBackStack() },
-                modifier = Modifier.size(44.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = "Voltar",
                     tint = Color.White,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
             Text(
                 text = "Histórico de Notificações",
                 color = Color.White,
-                fontSize = 28.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 6.dp)
             )
         }
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             items(buses) { bus ->
                 NotifiedBusComponent(bus)

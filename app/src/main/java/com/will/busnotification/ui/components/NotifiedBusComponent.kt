@@ -1,5 +1,6 @@
 package com.will.busnotification.ui.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -21,9 +21,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,9 +43,9 @@ fun NotifiedBusComponent(
         modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFAFC8E6)),
-        shape = RoundedCornerShape(10.dp)
+        shape = RoundedCornerShape(8.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -58,13 +58,13 @@ fun NotifiedBusComponent(
                     Image(
                         painter = painterResource(id = R.drawable.onibus),
                         contentDescription = "Ônibus",
-                        modifier = Modifier.size(46.dp),
+                        modifier = Modifier.size(14.dp),
                         colorFilter = ColorFilter.tint(Color.Black)
                     )
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = bus.lineCode.ifBlank { bus.lineName },
-                        fontSize = 32.sp,
+                        text = bus.lineName.ifBlank { bus.lineCode },
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Black,
                         maxLines = 1,
@@ -74,37 +74,37 @@ fun NotifiedBusComponent(
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(4.dp))
                         .background(Color(0xFF2F2DCC))
-                        .padding(horizontal = 18.dp, vertical = 8.dp),
+                        .padding(horizontal = 8.dp, vertical = 2.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = bus.arrivalTime.toHourMinute(),
                         color = Color.White,
-                        fontSize = 26.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
                 text = "${bus.departureStop} → ${bus.arrivalStop}",
-                fontSize = 21.sp,
-                color = Color.Black,
+                fontSize = 8.sp,
+                color = Color(0xFF3B3B3B),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = bus.headsign,
-                fontSize = 21.sp,
-                color = Color.Black,
-                maxLines = 2,
+                fontSize = 8.sp,
+                color = Color(0xFF1F1F1F),
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
