@@ -1,14 +1,18 @@
 package com.will.busnotification.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.Image
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
@@ -18,11 +22,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.will.busnotification.R
 import com.will.busnotification.data.model.TransitSegment
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun NotifiedBusComponent(
@@ -31,88 +41,86 @@ fun NotifiedBusComponent(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFC7DFFE)),
-        shape = RoundedCornerShape(12.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFAFC8E6)),
+        shape = RoundedCornerShape(10.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Top row: line name + time badge
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 18.dp)) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Left: bus icon + line name
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(text = "🚌", fontSize = 24.sp)
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.onibus),
+                        contentDescription = "Ônibus",
+                        modifier = Modifier.size(46.dp),
+                        colorFilter = ColorFilter.tint(Color.Black)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = bus.lineCode,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.Black
+                        text = bus.lineCode.ifBlank { bus.lineName },
+                        fontSize = 32.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
-                // Right: time badge
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF2C3ED6))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color(0xFF2F2DCC))
+                        .padding(horizontal = 18.dp, vertical = 8.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = bus.arrivalTime,
+                        text = bus.arrivalTime.toHourMinute(),
                         color = Color.White,
-                        fontSize = 16.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            // Route: departure → arrival
+            Spacer(modifier = Modifier.height(18.dp))
+
             Text(
                 text = "${bus.departureStop} → ${bus.arrivalStop}",
-                fontSize = 14.sp,
-                color = Color(0xFF1F2933),
+                fontSize = 21.sp,
+                color = Color.Black,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(bottom = 8.dp)
+                overflow = TextOverflow.Ellipsis
             )
 
-            // Destination street
+            Spacer(modifier = Modifier.height(10.dp))
+
             Text(
                 text = bus.headsign,
-                fontSize = 16.sp,
-                color = Color(0xFF0F1720),
+                fontSize = 21.sp,
+                color = Color.Black,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(bottom = 12.dp)
+                overflow = TextOverflow.Ellipsis
             )
+        }
+    }
+}
 
-            // Bottom info: today's times
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Hoje, ${bus.departureTime}",
-                    fontSize = 12.sp,
-                    color = Color(0xFF1F2933)
-                )
-                Text(
-                    text = "Hoje, ${bus.arrivalTime}",
-                    fontSize = 12.sp,
-                    color = Color(0xFF1F2933)
-                )
-            }
+private fun String.toHourMinute(): String {
+    return runCatching {
+        Instant.parse(this)
+            .atZone(ZoneId.systemDefault())
+            .format(DateTimeFormatter.ofPattern("HH:mm"))
+    }.getOrElse {
+        if (contains('T') && length >= 16) {
+            substring(11, 16)
+        } else {
+            this
         }
     }
 }
