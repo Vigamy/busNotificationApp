@@ -14,6 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,6 +42,7 @@ fun SetupNotificationScreen(
     destination: String?
 ) {
     val notificationSetupViewModel: NotificationSetupViewModel = viewModel()
+    val context = LocalContext.current
 
     val decodedLineName = lineName?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
     val decodedDepartureStop = departureStop?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
@@ -84,7 +86,7 @@ fun SetupNotificationScreen(
                         notificationWindow = selectedWindow
                     )
 
-                    notificationSetupViewModel.saveNotificationSetup(payload)
+                    notificationSetupViewModel.saveNotificationSetup(context, payload)
 
                     navController.navigate("home") {
                         popUpTo("home") { inclusive = true }

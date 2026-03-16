@@ -90,6 +90,9 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.play.services)
 
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+
     // --- Firebase (BoM + Firestore KTX) ---
     // Using the BoM ensures compatible versions for firebase libraries.
     implementation(platform(libs.firebase.bom))
