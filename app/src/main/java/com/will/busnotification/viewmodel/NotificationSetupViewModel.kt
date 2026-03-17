@@ -1,28 +1,19 @@
 package com.will.busnotification.viewmodel
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.will.busnotification.data.dto.NotificationSetupPayload
-
-interface NotificationScheduleManager {
-    fun scheduleNotificationWindow(payload: NotificationSetupPayload)
-}
-
-class DefaultNotificationScheduleManager : NotificationScheduleManager {
-    override fun scheduleNotificationWindow(payload: NotificationSetupPayload) {
-        // TODO: substituir por integração real com WorkManager para agendamento recorrente.
-        Log.d("NotificationSchedule", "Agendando janela: $payload")
-    }
-}
+import com.will.busnotification.notification.NotificationSchedulerWorker
 
 class NotificationSetupViewModel : ViewModel() {
 
     private val firestore = Firebase.firestore
-    private val scheduleManager: NotificationScheduleManager = DefaultNotificationScheduleManager()
 
     fun saveNotificationSetup(
+        context: Context,
         payload: NotificationSetupPayload,
         onSuccess: () -> Unit = {},
         onError: (Throwable) -> Unit = {}
@@ -43,14 +34,15 @@ class NotificationSetupViewModel : ViewModel() {
         firestore.collection("locations").document(firestorePayload["lineCode"].toString())
             .set(firestorePayload)
             .addOnSuccessListener {
-                scheduleManager.scheduleNotificationWindow(payload)
+                // Reagenda o worker pra considerar a nova janela imediatamente
+                NotificationSchedulerWorker.schedule(context)
+
                 onSuccess()
-                Log.d("NotificationSetupViewModel", "Notification setup saved successfully")
+                Log.d("NotificationSetupVM", "Setup salvo e worker reagendado")
             }
             .addOnFailureListener { error ->
                 onError(error)
-                Log.d("NotificationSetupViewModel", "Notification setup save failed: $error")
+                Log.e("NotificationSetupVM", "Falha ao salvar: $error")
             }
     }
 }
-
