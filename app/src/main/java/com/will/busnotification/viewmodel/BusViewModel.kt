@@ -11,6 +11,7 @@ import com.will.busnotification.data.dto.RouteRequest
 import com.will.busnotification.data.dto.TransitPreferences
 import com.will.busnotification.data.model.TransitSegment
 import com.will.busnotification.data.network.GooglePlacesApiService
+import com.will.busnotification.repository.LocationProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BusViewModel @Inject constructor(
-    private val apiService: GooglePlacesApiService
+    private val apiService: GooglePlacesApiService,
+    private val locationProvider: LocationProvider
 ) : ViewModel() {
 
     private val _busList = MutableStateFlow<List<TransitSegment>>(emptyList())
@@ -43,6 +45,14 @@ class BusViewModel @Inject constructor(
             Log.d(TAG, "=== INICIANDO CARREGAMENTO DOS ÔNIBUS SALVOS ===")
 
             try {
+                // Resolve the user's current location to use as origin
+                val origin = resolveCurrentOrigin()
+                if (origin == null) {
+                    Log.w(TAG, "⚠ Localização atual indisponível — não é possível calcular rotas.")
+                    _busList.value = emptyList()
+                    return@launch
+                }
+
                 val snapshot = firestore.collection("locations").get().await()
                 val documents = snapshot.documents
                 Log.d(TAG, "Total de ônibus salvos no Firestore: ${documents.size}")
@@ -57,21 +67,19 @@ class BusViewModel @Inject constructor(
 
                 for (doc in documents) {
                     val lineCode = doc.getString("lineCode") ?: doc.id
-                    val departureStop = doc.getString("departureStop") ?: ""
-                    val destination = ("Terminal" + doc.getString("destination"))
+                    val destination = doc.getString("destination") ?: ""
 
                     Log.d(TAG, "--- Processando linha: $lineCode ---")
-                    Log.d(TAG, "  Origem (departureStop): '$departureStop'")
                     Log.d(TAG, "  Destino (destination): '$destination'")
 
-                    if (departureStop.isBlank() || destination.isBlank()) {
-                        Log.w(TAG, "  ⚠ Campos obrigatórios ausentes para linha '$lineCode' — pulando.")
+                    if (destination.isBlank()) {
+                        Log.w(TAG, "  ⚠ Destino ausente para linha '$lineCode' — pulando.")
                         continue
                     }
 
                     val request = RouteRequest(
-                        origin = AdressRequest(departureStop),
-                        destination = AdressRequest(destination),
+                        origin = origin,
+                        destination = AdressRequest.fromAddress(destination),
                         travelMode = "TRANSIT",
                         computeAlternativeRoutes = true,
                         transitPreferences = TransitPreferences(
@@ -134,6 +142,25 @@ class BusViewModel @Inject constructor(
             } finally {
                 _isLoading.value = false
             }
+        }
+    }
+
+    /**
+     * Resolves the user's current location into a Routes API origin waypoint.
+     * Returns null if location is unavailable.
+     */
+    private fun resolveCurrentOrigin(): AdressRequest? {
+        return try {
+            val loc = locationProvider.getLastKnownLocation()
+            if (loc != null) {
+                Log.d(TAG, "Using device location: ${loc.latitude}, ${loc.longitude}")
+                AdressRequest.fromLatLng(loc.latitude, loc.longitude)
+            } else {
+                null
+            }
+        } catch (e: Throwable) {
+            Log.e(TAG, "Failed to get location", e)
+            null
         }
     }
 }

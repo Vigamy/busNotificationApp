@@ -4,9 +4,7 @@ import android.util.Log
 import com.will.busnotification.BuildConfig
 import com.will.busnotification.data.dto.AdressRequest
 import com.will.busnotification.data.dto.DirectionsResponseDto
-import com.will.busnotification.data.dto.PlaceResult
 import com.will.busnotification.data.dto.RouteRequest
-import com.will.busnotification.data.dto.TransitDetailsDto
 import com.will.busnotification.data.dto.TransitPreferences
 import com.will.busnotification.data.mapper.toTransitSegments
 import com.will.busnotification.data.model.TransitSegment
@@ -23,19 +21,14 @@ class PlacesRepositoryImpl @Inject constructor(
     override suspend fun searchPlaces(query: String): List<TransitSegment> {
         val apiKey = BuildConfig.GOOGLE_API_KEY
 
-        val loc = try {
-            locationProvider.getLastKnownLocation()
-        } catch (_: Throwable) {
-            null
-        }
+        val origin = resolveOrigin()
+            ?: throw IllegalStateException(
+                "Não foi possível obter a localização atual. Verifique se a permissão de localização foi concedida."
+            )
 
         val request = RouteRequest(
-            origin = (
-                    AdressRequest("Rua são ladislau, 141")
-            ),
-            destination = (
-                    AdressRequest(query)
-            ),
+            origin = origin,
+            destination = AdressRequest.fromAddress(query),
             travelMode = "TRANSIT",
             computeAlternativeRoutes = true,
             transitPreferences = TransitPreferences(
@@ -45,7 +38,8 @@ class PlacesRepositoryImpl @Inject constructor(
         )
 
         try {
-            val response: DirectionsResponseDto = apiService.searchPlaces(apiKey = apiKey, request = request)
+            val response: DirectionsResponseDto =
+                apiService.searchPlaces(apiKey = apiKey, request = request)
             return response.toTransitSegments()
         } catch (e: HttpException) {
             val errBody = try {
@@ -58,6 +52,26 @@ class PlacesRepositoryImpl @Inject constructor(
         } catch (e: IOException) {
             Log.e("PlacesRepository", "Network I/O error", e)
             throw e
+        }
+    }
+
+    /**
+     * Tries to resolve the user's current location as a Routes API origin.
+     * Prefers GPS coordinates; falls back to null if unavailable.
+     */
+    private fun resolveOrigin(): AdressRequest? {
+        return try {
+            val loc = locationProvider.getLastKnownLocation()
+            if (loc != null) {
+                Log.d("PlacesRepository", "Using device location: ${loc.latitude}, ${loc.longitude}")
+                AdressRequest.fromLatLng(loc.latitude, loc.longitude)
+            } else {
+                Log.w("PlacesRepository", "Location unavailable — getLastKnownLocation returned null")
+                null
+            }
+        } catch (e: Throwable) {
+            Log.e("PlacesRepository", "Failed to get location", e)
+            null
         }
     }
 }
