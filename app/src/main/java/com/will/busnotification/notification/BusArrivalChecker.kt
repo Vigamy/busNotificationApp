@@ -76,11 +76,19 @@ object BusArrivalChecker {
             )
         )
 
+        Log.d(TAG, "=== ENVIANDO REQUISIÇÃO PARA ROUTES API ===")
+        Log.d(TAG, "  Linha     : $lineCode ($lineName)")
+        Log.d(TAG, "  Origem    : $departureStop")
+        Log.d(TAG, "  Destino   : Terminal$destination")
+        Log.d(TAG, "  Corpo     : $request")
+
         return try {
             val response = apiService.searchPlaces(
                 apiKey = BuildConfig.GOOGLE_API_KEY,
                 request = request
             )
+
+            Log.d(TAG, "  ✓ Resposta recebida. Rotas: ${response.routes.size}")
 
             val transitDetail = response.routes
                 .firstOrNull()

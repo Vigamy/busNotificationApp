@@ -3,6 +3,7 @@ package com.will.busnotification.notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.IBinder
 import android.util.Log
 import com.google.firebase.firestore.ktx.firestore
@@ -62,10 +63,11 @@ class BusNotificationService : Service() {
 
         Log.d(TAG, "Service iniciado. Janela termina às $endHour:$endMinute")
 
-        // Inicia como Foreground Service
+        // Inicia como Foreground Service (minSdk=30, sempre >= Q)
         startForeground(
             NotificationHelper.MONITORING_NOTIFICATION_ID,
-            NotificationHelper.buildMonitoringNotification(this)
+            NotificationHelper.buildMonitoringNotification(this),
+            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
         )
 
         // Inicia o loop de monitoramento
@@ -113,12 +115,16 @@ class BusNotificationService : Service() {
                 return
             }
 
+            Log.d(TAG, "=== CHECANDO ${documents.size} ÔNIBUS SALVOS ===")
+
             // Checa se estamos na janela de cada documento
-            for (doc in documents) {
+            for ((index, doc) in documents.withIndex()) {
                 val lineCode = doc.getString("lineCode") ?: doc.id
                 val departureStop = doc.getString("departureStop") ?: ""
                 val destination = doc.getString("destination") ?: ""
                 val lineName = doc.getString("lineName") ?: lineCode
+
+                Log.d(TAG, "--- [${index + 1}/${documents.size}] Processando linha: $lineCode ($lineName) ---")
 
                 // Checa janela específica desse ônibus
                 val docStartHour = doc.getLong("startHour")?.toInt() ?: 0
@@ -130,7 +136,10 @@ class BusNotificationService : Service() {
                 val windowStart = LocalTime.of(docStartHour, docStartMinute)
                 val windowEnd = LocalTime.of(docEndHour, docEndMinute)
 
+                Log.d(TAG, "  Janela: $windowStart - $windowEnd | Agora: $now")
+
                 if (now.isBefore(windowStart) || now.isAfter(windowEnd)) {
+                    Log.d(TAG, "  Fora da janela de notificação — pulando.")
                     // Fora da janela desse ônibus — dismiss se tiver notificação ativa
                     activeNotifications[lineCode]?.let { notifId ->
                         NotificationHelper.dismissNotification(this@BusNotificationService, notifId)
@@ -139,6 +148,7 @@ class BusNotificationService : Service() {
                     continue
                 }
 
+                Log.d(TAG, "  Dentro da janela. Consultando Routes API...")
                 val result = BusArrivalChecker.checkArrival(
                     departureStop = departureStop,
                     destination = destination,
@@ -146,7 +156,10 @@ class BusNotificationService : Service() {
                     lineName = lineName
                 )
 
-                if (result == null) continue
+                if (result == null) {
+                    Log.w(TAG, "  Sem resultado para $lineCode — pulando.")
+                    continue
+                }
 
                 handleArrivalResult(result)
             }
