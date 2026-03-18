@@ -27,6 +27,8 @@ import com.will.busnotification.ui.components.HeaderComponent
 import com.will.busnotification.ui.components.NotificationSettingsCard
 import com.will.busnotification.ui.components.RemovePointButton
 import com.will.busnotification.ui.components.SaveChangesButton
+import com.will.busnotification.ui.permissions.RequestNotificationPermission
+import com.will.busnotification.ui.permissions.isNotificationPermissionGranted
 import com.will.busnotification.viewmodel.NotificationSetupViewModel
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -50,6 +52,30 @@ fun SetupNotificationScreen(
     val decodedDestination = destination?.let { URLDecoder.decode(it, StandardCharsets.UTF_8.toString()) }
 
     var selectedWindow by remember { mutableStateOf(NotificationWindow(8, 0, 18, 0)) }
+
+    // Controls whether we should show the notification permission request
+    var requestingNotificationPermission by remember { mutableStateOf(false) }
+
+    // Payload to save after permission is resolved
+    var pendingPayload by remember { mutableStateOf<NotificationSetupPayload?>(null) }
+
+    // When notification permission is requested and resolved, save and navigate
+    if (requestingNotificationPermission && pendingPayload != null) {
+        RequestNotificationPermission { _ ->
+            // Save regardless of whether user granted or denied notification permission.
+            // The save itself is not blocked by notification permission —
+            // notifications just won't show if denied, but data is still saved.
+            pendingPayload?.let { payload ->
+                notificationSetupViewModel.saveNotificationSetup(context, payload)
+            }
+            pendingPayload = null
+            requestingNotificationPermission = false
+
+            navController.navigate("home") {
+                popUpTo("home") { inclusive = true }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -86,10 +112,16 @@ fun SetupNotificationScreen(
                         notificationWindow = selectedWindow
                     )
 
-                    notificationSetupViewModel.saveNotificationSetup(context, payload)
-
-                    navController.navigate("home") {
-                        popUpTo("home") { inclusive = true }
+                    if (isNotificationPermissionGranted(context)) {
+                        // Permission already granted — save directly
+                        notificationSetupViewModel.saveNotificationSetup(context, payload)
+                        navController.navigate("home") {
+                            popUpTo("home") { inclusive = true }
+                        }
+                    } else {
+                        // Need to request notification permission first
+                        pendingPayload = payload
+                        requestingNotificationPermission = true
                     }
                 }
             )
