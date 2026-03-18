@@ -1,5 +1,6 @@
 package com.will.busnotification.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -35,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import com.will.busnotification.R
 import com.will.busnotification.ui.components.BusItemComponent
 import com.will.busnotification.ui.components.HeaderComponent
+import com.will.busnotification.ui.permissions.RequestLocationPermission
 import com.will.busnotification.viewmodel.BusViewModel
 
 @Composable
@@ -44,8 +49,22 @@ fun HomeScreen(
 ) {
     val buses by viewModel.busList.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.loadBusFromFirebase()
+    // Track whether location permission has been resolved (granted or denied)
+    var locationPermissionResolved by remember { mutableStateOf(false) }
+    var locationGranted by remember { mutableStateOf(false) }
+
+    // Request location permission on first composition
+    RequestLocationPermission { granted ->
+        locationGranted = granted
+        locationPermissionResolved = true
+        Log.d("HomeScreen", "Location permission ${if (granted) "granted" else "denied"}")
+    }
+
+    // Only load buses after location permission is resolved and granted
+    LaunchedEffect(locationPermissionResolved, locationGranted) {
+        if (locationPermissionResolved && locationGranted) {
+            viewModel.loadBusFromFirebase()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -79,7 +98,12 @@ fun HomeScreen(
                                 )
                                 Spacer(modifier = Modifier.height(24.dp))
                                 Text(
-                                    text = "Você não adicionou nenhuma notificação ainda",
+                                    text = if (!locationPermissionResolved)
+                                        "Aguardando permissão de localização..."
+                                    else if (!locationGranted)
+                                        "Permissão de localização necessária para buscar ônibus"
+                                    else
+                                        "Você não adicionou nenhuma notificação ainda",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     textAlign = TextAlign.Center,
@@ -87,7 +111,10 @@ fun HomeScreen(
                                     modifier = Modifier.padding(horizontal = 16.dp)
                                 )
                                 Text(
-                                    text = "Toque no botão + para começar!",
+                                    text = if (!locationGranted && locationPermissionResolved)
+                                        "Ative a localização nas configurações do app"
+                                    else
+                                        "Toque no botão + para começar!",
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center,
                                     color = MaterialTheme.colorScheme.outline,
