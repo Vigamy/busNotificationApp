@@ -22,6 +22,12 @@ class SearchLineViewModel @Inject constructor(
     private val placesRepository: PlacesRepository
 ) : ViewModel() {
 
+    companion object {
+        private const val TAG = "SearchLineViewModel"
+        private const val MIN_QUERY_LENGTH = 3
+        private const val DEBOUNCE_MS = 600L
+    }
+
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -31,27 +37,51 @@ class SearchLineViewModel @Inject constructor(
     private val _searchResults = MutableStateFlow<List<TransitSegment>>(emptyList())
     val searchResults: StateFlow<List<TransitSegment>> = _searchResults.asStateFlow()
 
+    /** Null = no error; non-null = user-facing error message */
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    /** True when search completed successfully but returned zero results */
+    private val _emptyResults = MutableStateFlow(false)
+    val emptyResults: StateFlow<Boolean> = _emptyResults.asStateFlow()
+
     init {
         _searchQuery
-            .debounce(500) // Evita chamadas de API a cada letra digitada
+            .debounce(DEBOUNCE_MS)
             .onEach { query ->
-                if (query.isBlank()) {
+                _errorMessage.value = null
+                _emptyResults.value = false
+
+                if (query.isBlank() || query.length < MIN_QUERY_LENGTH) {
                     _searchResults.value = emptyList()
                     _isSearching.value = false
-                } else {
-                    _isSearching.value = true
-                    viewModelScope.launch {
-                        try {
-                            val results = placesRepository.searchPlaces(query)
-                            _searchResults.value = results
-                        } catch (e: Exception) {
-                            Log.e("AddBusViewModel", "searchPlaces failed", e)
-                            _searchResults.value = emptyList()
-                        } finally {
-                            _isSearching.value = false
+                    return@onEach
+                }
+
+                _isSearching.value = true
+                viewModelScope.launch {
+                    try {
+                        val results = placesRepository.searchPlaces(query)
+                        _searchResults.value = results
+                        _emptyResults.value = results.isEmpty()
+
+                        if (results.isEmpty()) {
+                            Log.d(TAG, "No results for query: '$query'")
+                        } else {
+                            Log.d(TAG, "Found ${results.size} results for '$query'")
                         }
+                    } catch (e: IllegalStateException) {
+                        // Location unavailable
+                        Log.e(TAG, "Location error", e)
+                        _searchResults.value = emptyList()
+                        _errorMessage.value = "Localização indisponível. Verifique se o GPS está ativado e a permissão concedida."
+                    } catch (e: Exception) {
+                        Log.e(TAG, "searchPlaces failed", e)
+                        _searchResults.value = emptyList()
+                        _errorMessage.value = "Erro ao buscar rotas. Verifique sua conexão e tente novamente."
+                    } finally {
+                        _isSearching.value = false
                     }
-                    Log.d("Google API response", "${_searchResults.value}")
                 }
             }
             .launchIn(viewModelScope)
